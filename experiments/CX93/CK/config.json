@@ -1,0 +1,36 @@
+{
+    "state": "qa",
+    "id": "CX93",
+    "name": "testtt",
+    "brand": "CK",
+    "sharedCode": {
+      "js": "./experiments/CX93/CK/sharedCode/shared.js",
+      "css": "./experiments/CX93/CK/sharedCode/shared.css"
+    },
+    "variants": [
+        {
+            "name": "variant0",
+            "js": "./experiments/CX93/CK/variations/variation0/index.js",
+            "css": "./experiments/CX93/CK/variations/variation0/index.css"
+        }
+    ,
+        {
+            "name": "variant1",
+            "js": "./experiments/CX93/CK/variations/variation1/index.js",
+            "css": "./experiments/CX93/CK/variations/variation1/index.css"
+        }
+    ,
+        {
+            "name": "variant2",
+            "js": "./experiments/CX93/CK/variations/variation2/index.js",
+            "css": "./experiments/CX93/CK/variations/variation2/index.css"
+        }
+    ],
+    "audiences": "./experiments/CX93/CK/targeting/audiences.json",
+    "activation": "./experiments/CX93/CK/targeting/callback.js",
+    "customGoals": "./experiments/CX93/CK/customGoals.json",
+    "urls": "./experiments/CX93/CK/targeting/urls.js",
+    "projectID": 4639710178443264,
+    "OptimizelyPageID": "",
+    "OptimizelyExperimentID": ""
+  }

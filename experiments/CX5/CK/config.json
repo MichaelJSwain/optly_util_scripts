@@ -1,0 +1,42 @@
+{
+    "state": "qa",
+    "id": "CX5",
+    "name": "test",
+    "brand": "CK",
+    "sharedCode": {
+      "js": "./experiments/CX5/CK/sharedCode/shared.js",
+      "css": "./experiments/CX5/CK/sharedCode/shared.css"
+    },
+    "variants": [
+        {
+            "name": "variant0",
+            "js": "./experiments/CX5/CK/variations/variation0/index.js",
+            "css": "./experiments/CX5/CK/variations/variation0/index.css"
+        }
+    ,
+        {
+            "name": "variant1",
+            "js": "./experiments/CX5/CK/variations/variation1/index.js",
+            "css": "./experiments/CX5/CK/variations/variation1/index.css"
+        }
+    ,
+        {
+            "name": "variant2",
+            "js": "./experiments/CX5/CK/variations/variation2/index.js",
+            "css": "./experiments/CX5/CK/variations/variation2/index.css"
+        }
+    ,
+        {
+            "name": "variant3",
+            "js": "./experiments/CX5/CK/variations/variation3/index.js",
+            "css": "./experiments/CX5/CK/variations/variation3/index.css"
+        }
+    ],
+    "audiences": "./experiments/CX5/CK/targeting/audiences.json",
+    "activation": "./experiments/CX5/CK/targeting/callback.js",
+    "customGoals": "./experiments/CX5/CK/customGoals.json",
+    "urls": "./experiments/CX5/CK/targeting/urls.js",
+    "projectID": 4639710178443264,
+    "OptimizelyPageID": "",
+    "OptimizelyExperimentID": ""
+  }

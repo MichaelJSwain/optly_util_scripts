@@ -1,0 +1,22 @@
+{
+  "name": "optly_util_scripts2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node scripts/build.js --command build",
+    "new": "node scripts/new.js --command new",
+    "publish": "node scripts/publish.js --command publish",
+    "set": "node scripts/set.js --command set"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "fs": "^0.0.1-security",
+    "inquirer": "^12.2.0",
+    "yargs": "^17.7.2"
+  }
+}
