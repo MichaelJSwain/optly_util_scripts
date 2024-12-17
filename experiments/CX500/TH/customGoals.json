@@ -1,3 +1,0 @@
-[
-          {"aggregator":"sum","field":"revenue","scope":"visitor","winning_direction":"increasing"}
-        ]
