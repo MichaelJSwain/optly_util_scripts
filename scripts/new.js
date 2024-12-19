@@ -1,5 +1,3 @@
-console.log("running new file...");
-
 const inquirer = require("inquirer");
 const fs = require("fs");
 
@@ -117,7 +115,7 @@ prompt(questions).then(async (answers) => {
         numVariants
     }
     createExperimentScaffolding(data);
-    console.log("experiment scaffolded!");
+    console.log("✅ experiment scaffolded!");
     } else {
         console.log(`The directory with experiment ID '${expID}' already exists. Would you like to create an iteration experiment?`);
     }
