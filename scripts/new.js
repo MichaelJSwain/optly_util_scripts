@@ -1,5 +1,3 @@
-console.log("running new file...");
-
 const inquirer = require("inquirer");
 const fs = require("fs");
 
@@ -78,6 +76,8 @@ const getBrandDetails = (brand) => {
         {
             name: "TH",
             projectID: 14193350179,
+            defaultUrl: "(uk|nl|de|fr|it|es|pl).tommy.com",
+            editorUrl: "nl.tommy.com"
         },
         ];
     } else if (brand.toLowerCase() === "ck") {
@@ -85,6 +85,8 @@ const getBrandDetails = (brand) => {
         {
             name: "CK",
             projectID: 4639710178443264,
+            defaultUrl: "www.calvinklein.(co.uk|nl|de|fr|it|es|pl)",
+            editorUrl: "www.calvinklein.nl"
         },
         ];
     } else {
@@ -92,10 +94,14 @@ const getBrandDetails = (brand) => {
         {
             name: "TH",
             projectID: 14193350179,
+            defaultUrl: "(uk|nl|de|fr|it|es|pl).tommy.com",
+            editorUrl: "nl.tommy.com"
         },
         {
             name: "CK",
             projectID: 4639710178443264,
+            defaultUrl: "www.calvinklein.(co.uk|nl|de|fr|it|es|pl)",
+            editorUrl: "www.calvinklein.nl"
         },
         ];
     }
@@ -117,7 +123,7 @@ prompt(questions).then(async (answers) => {
         numVariants
     }
     createExperimentScaffolding(data);
-    console.log("experiment scaffolded!");
+    console.log("✅ experiment scaffolded!");
     } else {
         console.log(`The directory with experiment ID '${expID}' already exists. Would you like to create an iteration experiment?`);
     }
@@ -188,8 +194,18 @@ const createExperimentScaffolding = (
         ""
       );
       fs.writeFileSync(
-        `./experiments/${expID}/${brand.name}/targeting/urls.js`,
-        ""
+        `./experiments/${expID}/${brand.name}/targeting/urls.json`,
+        `[
+            "and",
+            [
+              "or",
+              {
+                  "match_type": "regex",
+                  "type": "url",
+                  "value": "${brand.defaultUrl}"
+              }
+            ]
+        ]`
       );
       fs.writeFileSync(
         `./experiments/${expID}/${brand.name}/customGoals.json`,
@@ -212,7 +228,8 @@ const createExperimentScaffolding = (
         expName,
         numVariants,
         brand.name,
-        brand.projectID
+        brand.projectID,
+        brand.editorUrl
       );
       fs.writeFileSync(
         `./experiments/${expID}/${brand.name}/config.json`,
@@ -222,7 +239,7 @@ const createExperimentScaffolding = (
   });
 };
 
-const createConfigFile = (expID, expName, numVariants, brand, projectID) => {
+const createConfigFile = (expID, expName, numVariants, brand, projectID, editorUrl) => {
   const variants = Array.from(Array(numVariants).keys()).map((el, index) => {
     return `
         {
@@ -246,7 +263,8 @@ const createConfigFile = (expID, expName, numVariants, brand, projectID) => {
     "audiences": "./experiments/${expID}/${brand}/targeting/audiences.json",
     "activation": "./experiments/${expID}/${brand}/targeting/callback.js",
     "customGoals": "./experiments/${expID}/${brand}/customGoals.json",
-    "urls": "./experiments/${expID}/${brand}/targeting/urls.js",
+    "urls": "./experiments/${expID}/${brand}/targeting/urls.json",
+    "editorUrl": "${editorUrl}",
     "projectID": ${projectID},
     "OptimizelyPageID": "",
     "OptimizelyExperimentID": ""
