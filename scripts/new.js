@@ -7,7 +7,7 @@ const questions = [
     name: "expID",
     message: "Experiment ID:",
     validate: (val) => {
-      if (val.indexOf("CX") < 0) {
+      if (val.toLowerCase().indexOf("cx") < 0) {
         return "The experiment ID must conform to the convention CX<number> e.g. CX999";
       } else {
         return true;
@@ -31,21 +31,8 @@ const questions = [
     name: "brand",
     message: "Which brand(s) does this experiment target? (TH / CK / DB)",
     validate: (val) => {
-      if (val !== "TH" && val !== "CK" && val !== "DB") {
+      if (val.toLowerCase() != "th" && val.toLowerCase() != "ck" && val.toLowerCase() != "db") {
         return "The experiment should target TH / CK / DB";
-      } else {
-        return true;
-      }
-    },
-  },
-  {
-    type: "input",
-    name: "locales",
-    message:
-      "Please enter the locales targeted by this experiment (UK|NL|DE|FR|IT|ES|PL etc.):",
-    validate: (val) => {
-      if (val.length < 1) {
-        return "Please enter a URL";
       } else {
         return true;
       }
@@ -65,78 +52,92 @@ const questions = [
   },
 ];
 
+const brandDetails = {
+  th: [
+        {
+            name: "TH",
+            projectID: 14193350179,
+            defaultUrl: "(uk|nl|de|fr|it|es|pl).tommy.com",
+            editorUrl: "nl.tommy.com"
+        }
+    ],
+  ck: [
+        {
+            name: "CK",
+            projectID: 4639710178443264,
+            defaultUrl: "www.calvinklein.(co.uk|nl|de|fr|it|es|pl)",
+            editorUrl: "www.calvinklein.nl"
+        }
+    ],
+  db: [
+      {
+          name: "TH",
+          projectID: 14193350179,
+          defaultUrl: "(uk|nl|de|fr|it|es|pl).tommy.com",
+          editorUrl: "nl.tommy.com"
+      },
+      {
+        name: "CK",
+        projectID: 4639710178443264,
+        defaultUrl: "www.calvinklein.(co.uk|nl|de|fr|it|es|pl)",
+        editorUrl: "www.calvinklein.nl"
+      }
+    ]
+}
+
 const checkExpIDexists = (expID) => {
     const expIDexists = fs.existsSync(`./experiments/${expID}`);
     return expIDexists;
 }
 
 const getBrandDetails = (brand) => {
-    if (brand.toLowerCase() === "th") {
-        brand = [
-        {
-            name: "TH",
-            projectID: 14193350179,
-            defaultUrl: "(uk|nl|de|fr|it|es|pl).tommy.com",
-            editorUrl: "nl.tommy.com"
-        },
-        ];
-    } else if (brand.toLowerCase() === "ck") {
-        brand = [
-        {
-            name: "CK",
-            projectID: 4639710178443264,
-            defaultUrl: "www.calvinklein.(co.uk|nl|de|fr|it|es|pl)",
-            editorUrl: "www.calvinklein.nl"
-        },
-        ];
-    } else {
-        brand = [
-        {
-            name: "TH",
-            projectID: 14193350179,
-            defaultUrl: "(uk|nl|de|fr|it|es|pl).tommy.com",
-            editorUrl: "nl.tommy.com"
-        },
-        {
-            name: "CK",
-            projectID: 4639710178443264,
-            defaultUrl: "www.calvinklein.(co.uk|nl|de|fr|it|es|pl)",
-            editorUrl: "www.calvinklein.nl"
-        },
-        ];
-    }
+    brand = brandDetails[brand.toLowerCase()];
     return brand;
 }
 
-const prompt = inquirer.createPromptModule();
-prompt(questions).then(async (answers) => {
-  let { brand, expID, expName, locales, numVariants } = answers;
+const createConfigFile = (expID, expName, numVariants, brand, projectID, editorUrl) => {
+  const variantArray = Array.from(Array(numVariants).keys());
+  const variants = variantArray.map((el, index) => {
+    return `
+        {
+            "name": "variant${index}",
+            "js": "./experiments/${expID}/${brand}/variations/variation${index}/index.js",
+            "css": "./experiments/${expID}/${brand}/variations/variation${index}/index.css"
+        }
+    `;
+  });
 
-  if (!checkExpIDexists(expID)) {
-    console.log("scaffolding experiment...");
-    brand = getBrandDetails(brand);
-    const data = {
-        brands: brand,
-        expID,
-        expName,
-        locales,
-        numVariants
-    }
-    createExperimentScaffolding(data);
-    console.log("✅ experiment scaffolded!");
-    } else {
-        console.log(`The directory with experiment ID '${expID}' already exists. Would you like to create an iteration experiment?`);
-    }
-});
+  const config = `{
+    "state": "qa",
+    "id": "${expID}",
+    "name": "${expName}",
+    "brand": "${brand}",
+    "sharedCode": {
+      "js": "./experiments/${expID}/${brand}/sharedCode/shared.js",
+      "css": "./experiments/${expID}/${brand}/sharedCode/shared.css"
+    },
+    "variants": [${variants}],
+    "audiences": "./experiments/${expID}/${brand}/targeting/audiences.json",
+    "activation": "./experiments/${expID}/${brand}/targeting/callback.js",
+    "customGoals": "./experiments/${expID}/${brand}/customGoals.json",
+    "urls": "./experiments/${expID}/${brand}/targeting/urls.json",
+    "editorUrl": "${editorUrl}",
+    "projectID": ${projectID},
+    "OptimizelyPageID": "",
+    "OptimizelyExperimentID": ""
+  }`;
+  return config;
+};
 
 // scaffold experiment in IDE
 const createExperimentScaffolding = (
   {brands,
   expID,
   expName,
-  locales,
   numVariants}
 ) => {
+  console.log("⚙️ Scaffolding experiment...");
+
   numVariants = parseInt(numVariants);
 
   brands.forEach((brand) => {
@@ -237,37 +238,25 @@ const createExperimentScaffolding = (
       );
     }
   });
+
+  console.log("✅ experiment scaffolded!");
 };
 
-const createConfigFile = (expID, expName, numVariants, brand, projectID, editorUrl) => {
-  const variants = Array.from(Array(numVariants).keys()).map((el, index) => {
-    return `
-        {
-            "name": "variant${index}",
-            "js": "./experiments/${expID}/${brand}/variations/variation${index}/index.js",
-            "css": "./experiments/${expID}/${brand}/variations/variation${index}/index.css"
-        }
-    `;
-  });
+const prompt = inquirer.createPromptModule();
+prompt(questions).then(async (answers) => {
+  let { brand, expID, expName, numVariants } = answers;
+  expID = expID.toUpperCase();
 
-  const config = `{
-    "state": "qa",
-    "id": "${expID}",
-    "name": "${expName}",
-    "brand": "${brand}",
-    "sharedCode": {
-      "js": "./experiments/${expID}/${brand}/sharedCode/shared.js",
-      "css": "./experiments/${expID}/${brand}/sharedCode/shared.css"
-    },
-    "variants": [${variants}],
-    "audiences": "./experiments/${expID}/${brand}/targeting/audiences.json",
-    "activation": "./experiments/${expID}/${brand}/targeting/callback.js",
-    "customGoals": "./experiments/${expID}/${brand}/customGoals.json",
-    "urls": "./experiments/${expID}/${brand}/targeting/urls.json",
-    "editorUrl": "${editorUrl}",
-    "projectID": ${projectID},
-    "OptimizelyPageID": "",
-    "OptimizelyExperimentID": ""
-  }`;
-  return config;
-};
+  if (!checkExpIDexists(expID)) {
+    brand = getBrandDetails(brand);
+    const data = {
+        brands: brand,
+        expID,
+        expName,
+        numVariants
+    }
+    createExperimentScaffolding(data);
+  } else {
+      console.log(`The directory with experiment ID '${expID}' already exists. Please use a unique experiment ID.`);
+  }
+});
