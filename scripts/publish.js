@@ -16,7 +16,7 @@ const getUserInput = () => {
 }
 
 const getConfigFile = async (expID, brand) => {
-  console.log(`Getting config file for expID:${expID} brand:${brand}`)
+  console.log(`⚙️ Getting config file for expID:${expID} brand:${brand}`)
   let configFile = await fsp.readFile(
     `./experiments/${expID}/${brand}/config.json`,
     "binary"
@@ -26,7 +26,7 @@ const getConfigFile = async (expID, brand) => {
     return parsedConfig;
   })
   .catch(e => {
-    console.log(`Config file not found for expID:${expID} brand:${brand}. Please check that the expID and brand are valid.`);
+    console.log(`⚠️ Config file not found for expID:${expID} brand:${brand}. Please check that the expID and brand are valid.`);
     return false;
   });
   return configFile;
@@ -112,7 +112,6 @@ const getAudiences = async (path, brand) => {
 
 const getURLconditions = async (path) => {
   const urlConditions = await fsp.readFile(path, "binary");
-  console.log("url conditions = ", urlConditions);
   return urlConditions;
 };
 
@@ -134,8 +133,7 @@ const getCustomGoals = async (expID, brand) => {
   }
 };
 
-const createOptimizelyPage = async (expName, projectID, activation, urlConditions, editorUrl) => {
-  console.log(`Creating Optimizely Page for ${expName}`)
+const createOptimizelyPage = async (expName, projectID, activation, urlConditions, editorUrl, optlyPageID) => {
   if (expName && projectID) {
     const body = {
       archived: false,
@@ -148,13 +146,25 @@ const createOptimizelyPage = async (expName, projectID, activation, urlCondition
       activation_type: "callback",
     };
 
+    let endpoint;
+    let reqMethod;
+  
+    if (optlyPageID) {
+      endpoint = `https://api.optimizely.com/v2/pages/${optlyPageID}`;
+      reqMethod = "PATCH";
+      console.log(`⚙️ Updating existing page in the Optimizely UI: ${expName}`)
+    } else {
+      endpoint = 'https://api.optimizely.com/v2/pages';
+      reqMethod = "POST";
+      console.log(`⚙️ Creating a new PAGE in the Optimizely UI for experiment: ${expName}`)
+    }
     const optimizelyPage = await postToOptimizely(
       body,
-      "https://api.optimizely.com/v2/pages",
-      "POST"
+      endpoint,
+      reqMethod
     );
     if (!optimizelyPage.success) {
-      console.log(`Unable to create Optimizely page. ${optimizelyPage.code} - ${optimizelyPage.message}`);
+      console.log(`⚠️ Unable to create Optimizely page. ${optimizelyPage.code} - ${optimizelyPage.message}`);
     }
     return optimizelyPage;
   }
@@ -274,11 +284,11 @@ const createOptimizelyExperiment = async (
   if (OptimizelyExperimentID) {
     endpoint = `https://api.optimizely.com/v2/experiments/${OptimizelyExperimentID}`;
     reqMethod = "PATCH";
-    console.log(`Updating ${expName}`)
+    console.log(`⚙️ Updating existing experiment in Optimizely UI: ${expName}`)
   } else {
     endpoint = 'https://api.optimizely.com/v2/experiments';
     reqMethod = "POST";
-    console.log(`Creating a new experiment in the Optimizely UI for experiment: ${expName}`)
+    console.log(`⚙️ Creating a new experiment in the Optimizely UI for experiment: ${expName}`)
   }
 
   const optimizelyExp = await postToOptimizely(
@@ -287,7 +297,7 @@ const createOptimizelyExperiment = async (
     reqMethod
   );
   if (!optimizelyExp.success) {
-    console.log(`Unable to create Optimizely experiment. ${optimizelyExp.code} - ${optimizelyExp.message}`);
+    console.log(`⚠️ Unable to create Optimizely experiment. ${optimizelyExp.code} - ${optimizelyExp.message}`);
   }
   return optimizelyExp;
 };
@@ -317,16 +327,16 @@ const updateConfigFile = (expID, brand, configFile, key, resourceID) => {
       encoding: "utf8",
     },
     (err) => {
-      if (err) console.log(`Unable to update the ${key} in config file for expID:${expID} brand:${brand}`, err);
+      if (err) console.log(`⚠️ Unable to update the ${key} in config file for expID:${expID} brand:${brand}`, err);
       else {
-        console.log(`The ${key} in the config file for expID:${expID} brand:${brand} has been updated.`);
+        console.log(`✅ The ${key} in the config file for expID:${expID} brand:${brand} has been updated.`);
       }
     }
   );
 };
 
 const buildExp = async (configFile) => {
-  console.log("Building experiment... ");
+  console.log("⚙️ Building experiment... ");
       const {
       name,
       id,
@@ -378,16 +388,30 @@ const cowe = async () => {
     for (const brand of brands) {
       const configFile = await getConfigFile(expID, brand);
       if (configFile) {
-        const {id, name, projectID, callback, optlyAudiences, optlyGoals, variantCode, sharedCode, urlConditions, editorUrl, OptimizelyExperimentID} = await buildExp(configFile);
+        const {
+                id,
+                name, 
+                projectID, 
+                callback, 
+                optlyAudiences, 
+                optlyGoals, 
+                variantCode, 
+                sharedCode, 
+                urlConditions, 
+                editorUrl, 
+                OptimizelyExperimentID
+            } = await buildExp(configFile);
    
           const expName = `${id} - ${name}`;
-          let optlyPageID = configFile.OptimizelyPageID || await createOptimizelyPage(expName, projectID, callback, urlConditions, editorUrl);
-     
-          optlyPageID = optlyPageID.id ? optlyPageID.id : optlyPageID;
+
+          const optlyPage = await createOptimizelyPage(expName, projectID, callback, urlConditions, editorUrl, configFile.OptimizelyPageID);
+          const optlyPageID = optlyPage.id ? optlyPage.id : optlyPage;
+
           if (optlyPageID) {
                 if (!configFile.OptimizelyPageID) {
                     updateConfigFile(expID, brand, configFile, 'OptimizelyPageID', optlyPageID);
                 }
+
                 const optlyExperiment = await createOptimizelyExperiment(
                   expName,
                   optlyPageID,
@@ -398,6 +422,7 @@ const cowe = async () => {
                   sharedCode,
                   configFile.OptimizelyExperimentID
                 );
+
                 if (optlyExperiment && optlyExperiment.id && !configFile.OptimizelyExperimentID) {
                   updateConfigFile(expID, brand, configFile, 'OptimizelyExperimentID', optlyExperiment.id);
                 } 
