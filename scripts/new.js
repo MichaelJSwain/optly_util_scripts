@@ -1,5 +1,7 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
+require("dotenv").config();
+const { TH_PROJECT_ID, CK_PROJECT_ID } = process.env;
 
 const questions = [
   {
@@ -56,7 +58,7 @@ const brandDetails = {
   th: [
         {
             name: "TH",
-            projectID: 14193350179,
+            projectID: TH_PROJECT_ID,
             defaultUrl: "(uk|nl|de|fr|it|es|pl).tommy.com",
             editorUrl: "nl.tommy.com"
         }
@@ -64,7 +66,7 @@ const brandDetails = {
   ck: [
         {
             name: "CK",
-            projectID: 4639710178443264,
+            projectID: CK_PROJECT_ID,
             defaultUrl: "www.calvinklein.(co.uk|nl|de|fr|it|es|pl)",
             editorUrl: "www.calvinklein.nl"
         }
@@ -72,13 +74,13 @@ const brandDetails = {
   db: [
       {
           name: "TH",
-          projectID: 14193350179,
+          projectID: TH_PROJECT_ID,
           defaultUrl: "(uk|nl|de|fr|it|es|pl).tommy.com",
           editorUrl: "nl.tommy.com"
       },
       {
         name: "CK",
-        projectID: 4639710178443264,
+        projectID: CK_PROJECT_ID,
         defaultUrl: "www.calvinklein.(co.uk|nl|de|fr|it|es|pl)",
         editorUrl: "www.calvinklein.nl"
       }
