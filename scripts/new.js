@@ -58,7 +58,7 @@ const brandDetails = {
   th: [
         {
             name: "TH",
-            projectID: TH_PROJECT_ID,
+            projectID: parseInt(TH_PROJECT_ID),
             defaultUrl: "(uk|nl|de|fr|it|es|pl).tommy.com",
             editorUrl: "nl.tommy.com"
         }
@@ -66,7 +66,7 @@ const brandDetails = {
   ck: [
         {
             name: "CK",
-            projectID: CK_PROJECT_ID,
+            projectID: parseInt(CK_PROJECT_ID),
             defaultUrl: "www.calvinklein.(co.uk|nl|de|fr|it|es|pl)",
             editorUrl: "www.calvinklein.nl"
         }
@@ -74,13 +74,13 @@ const brandDetails = {
   db: [
       {
           name: "TH",
-          projectID: TH_PROJECT_ID,
+          projectID: parseInt(TH_PROJECT_ID),
           defaultUrl: "(uk|nl|de|fr|it|es|pl).tommy.com",
           editorUrl: "nl.tommy.com"
       },
       {
         name: "CK",
-        projectID: CK_PROJECT_ID,
+        projectID: parseInt(CK_PROJECT_ID),
         defaultUrl: "www.calvinklein.(co.uk|nl|de|fr|it|es|pl)",
         editorUrl: "www.calvinklein.nl"
       }

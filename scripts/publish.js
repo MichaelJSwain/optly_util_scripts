@@ -98,17 +98,17 @@ const getAudiences = async (path, brand) => {
     ]
     if (audienceObj.qa) {
       optimizelyAudiences.push({
-        "audience_id": brandUppercase === "TH" ? TH_QA_AUDIENCE_ID : CK_QA_AUDIENCE_ID
+        "audience_id": parseInt(brandUppercase === "TH" ? TH_QA_AUDIENCE_ID : CK_QA_AUDIENCE_ID)
       });
     }
     if (audienceObj.desktop) {
       optimizelyAudiences.push({
-        "audience_id": brandUppercase === "TH" ? TH_DT_AUDIENCE_ID : CK_DT_AUDIENCE_ID
+        "audience_id": parseInt(brandUppercase === "TH" ? TH_DT_AUDIENCE_ID : CK_DT_AUDIENCE_ID)
       });
     }
     if (audienceObj.mobile) {
       optimizelyAudiences.push({
-        "audience_id": brandUppercase === "TH" ? TH_MB_AUDIENCE_ID : CK_MB_AUDIENCE_ID
+        "audience_id": parseInt(brandUppercase === "TH" ? TH_MB_AUDIENCE_ID : CK_MB_AUDIENCE_ID)
       });
     }
 
