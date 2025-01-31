@@ -4,12 +4,12 @@ const inquirer = require("inquirer");
 const fs = require("fs");
 const fsp = fs.promises;
 require("dotenv").config();
-const { OPTLY_TOKEN } = process.env;
+const { OPTLY_TOKEN, CK_PROJECT_ID, TH_PROJECT_ID } = process.env;
 const args = process.argv;
 
 const projectID = {
-  TH: 14193350179,
-  CK: 4639710178443264
+  TH: parseInt(CK_PROJECT_ID),
+  CK: parseInt(TH_PROJECT_ID)
 }
 
 const questions = [

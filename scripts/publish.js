@@ -2,7 +2,13 @@ const fs = require("fs");
 const fsp = fs.promises;
 const args = process.argv;
 require("dotenv").config();
-const { OPTLY_TOKEN } = process.env;
+const { OPTLY_TOKEN, 
+        TH_QA_AUDIENCE_ID,
+        TH_MB_AUDIENCE_ID,
+        TH_DT_AUDIENCE_ID,
+        CK_QA_AUDIENCE_ID,
+        CK_MB_AUDIENCE_ID,
+        CK_DT_AUDIENCE_ID } = process.env;
 
 const getUserInput = () => {
   const userInput =
@@ -86,22 +92,23 @@ const getAudiences = async (path, brand) => {
   const audiences = await fsp.readFile(path, "binary");
   if (audiences) {
     const audienceObj = JSON.parse(audiences);
+    const brandUppercase = brand.toUpperCase();
     let optimizelyAudiences = [
       "and"
     ]
     if (audienceObj.qa) {
       optimizelyAudiences.push({
-        "audience_id": brand.toUpperCase() === "TH" ? 6161659085979648 : 5226595548397568
+        "audience_id": parseInt(brandUppercase === "TH" ? TH_QA_AUDIENCE_ID : CK_QA_AUDIENCE_ID)
       });
     }
     if (audienceObj.desktop) {
       optimizelyAudiences.push({
-        "audience_id": brand.toUpperCase() === "TH" ? 6533414275252224 : 5157423925690368
+        "audience_id": parseInt(brandUppercase === "TH" ? TH_DT_AUDIENCE_ID : CK_DT_AUDIENCE_ID)
       });
     }
     if (audienceObj.mobile) {
       optimizelyAudiences.push({
-        "audience_id": brand.toUpperCase() === "TH" ? 4873116552265728 : 4991908099915776
+        "audience_id": parseInt(brandUppercase === "TH" ? TH_MB_AUDIENCE_ID : CK_MB_AUDIENCE_ID)
       });
     }
 
