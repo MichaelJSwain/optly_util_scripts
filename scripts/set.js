@@ -103,6 +103,8 @@ const questions = [
                         console.log("⚠️ Unable to update the experiment status in the Optimizely UI");
                         console.log(err);
                     });
+            } else {
+                console.log(`⚠️ Unable to get OptimizelyExperimentID or name in the config file for path experiments/${expID}/${brand}/config.json`);
             }
         })
 
