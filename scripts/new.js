@@ -177,11 +177,11 @@ const createExperimentScaffolding = (
       });
       fs.writeFileSync(
         `./experiments/${expID}/${brand.name}/sharedCode/shared.js`,
-        ""
+        "/* Shared Code will apply to all variations in the experiment and is executed before variant level code */"
       );
       fs.writeFileSync(
         `./experiments/${expID}/${brand.name}/sharedCode/shared.css`,
-        ""
+         "/* Shared Code will apply to all variations in the experiment and is executed before variant level code */"
       );
 
       // create targeting folder and files
@@ -190,11 +190,13 @@ const createExperimentScaffolding = (
       });
       fs.writeFileSync(
         `./experiments/${expID}/${brand.name}/targeting/callback.js`,
-        `function callback(activate, options) {}`
-      );
-      fs.writeFileSync(
-        `./experiments/${expID}/${brand.name}/targeting/audiences.json`,
-        ""
+        `/ **
+            * Sample Activation Function
+            * For complete documentation, see https://docs.developers.optimizely.com/web/docs/dynamic-websites#section-callback
+            * @param {Function} activate - Call this function when you want to activate the page.
+            * @param {Object} options - An object containing Page information. 
+          */
+        function callback(activate, options) {}`
       );
       fs.writeFileSync(
         `./experiments/${expID}/${brand.name}/targeting/urls.json`,
@@ -259,6 +261,6 @@ prompt(questions).then(async (answers) => {
     }
     createExperimentScaffolding(data);
   } else {
-      console.log(`The directory with experiment ID '${expID}' already exists. Please use a unique experiment ID.`);
+      console.log(`⚠️ The directory with experiment ID '${expID}' already exists. Please use a unique experiment ID.`);
   }
 });
