@@ -1,9 +1,7 @@
 import 'dotenv/config'
 const { OPTLY_TOKEN } = process.env;
 
-export const networkManager = async (reqBody, endpoint, reqMethod) => {
-    console.log("running network manager...");
-    
+export const networkManager = async ({reqBody, endpoint, reqMethod}) => {
     const options = {
         method: reqMethod,
         headers: {
@@ -14,7 +12,7 @@ export const networkManager = async (reqBody, endpoint, reqMethod) => {
         body: JSON.stringify(reqBody),
       };
     
-        const res = await fetch(endpoint, options)
-        const resource = await res.json();
-        return resource && resource.id ? {...resource, success: true} : {...resource, success: false};
+      const res = await fetch(endpoint, options)
+      const resource = await res.json();
+      return resource && resource.id ? {...resource, success: true} : {...resource, success: false};
 }

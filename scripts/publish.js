@@ -1,5 +1,9 @@
 const fs = require("fs");
 const { networkManager } = require("./networkManager");
+const { updatePageEndpoint } = require("../endpoints/updatePageEndpoint");
+const { updateExperimentEndpoint } = require("../endpoints/updateExperimentEndpoint");
+const { createExperimentEndpoint } = require("../endpoints/createExperimentEndpoint");
+const { createPageEndpoint } = require("../endpoints/createPageEndpoint");
 const fsp = fs.promises;
 const args = process.argv;
 require("dotenv").config();
@@ -154,23 +158,9 @@ const createOptimizelyPage = async (expName, projectID, activation, urlCondition
       activation_type: "callback",
     };
 
-    let endpoint;
-    let reqMethod;
-  
-    if (optlyPageID) {
-      endpoint = `https://api.optimizely.com/v2/pages/${optlyPageID}`;
-      reqMethod = "PATCH";
-      console.log(`⚙️ Updating existing page in the Optimizely UI: ${expName}`)
-    } else {
-      endpoint = 'https://api.optimizely.com/v2/pages';
-      reqMethod = "POST";
-      console.log(`⚙️ Creating a new PAGE in the Optimizely UI for experiment: ${expName}`)
-    }
-    const optimizelyPage = await networkManager(
-      body,
-      endpoint,
-      reqMethod
-    );
+    const optimizelyRequest = optlyPageID ? updatePageEndpoint(body, optlyPageID) : createPageEndpoint(body);
+    const optimizelyPage = await networkManager(optimizelyRequest);
+
     if (!optimizelyPage.success) {
       console.log(`⚠️ Unable to create Optimizely page. ${optimizelyPage.code} - ${optimizelyPage.message}`);
     }
@@ -286,24 +276,9 @@ const createOptimizelyExperiment = async (
     body.metrics = goals;
   }
 
-  let endpoint;
-  let reqMethod;
+  const optimizelyRequest = OptimizelyExperimentID ? updateExperimentEndpoint(body, OptimizelyExperimentID) : createExperimentEndpoint(body);
+  const optimizelyExp = await networkManager(optimizelyRequest);
 
-  if (OptimizelyExperimentID) {
-    endpoint = `https://api.optimizely.com/v2/experiments/${OptimizelyExperimentID}`;
-    reqMethod = "PATCH";
-    console.log(`⚙️ Updating existing experiment in Optimizely UI: ${expName}`)
-  } else {
-    endpoint = 'https://api.optimizely.com/v2/experiments';
-    reqMethod = "POST";
-    console.log(`⚙️ Creating a new experiment in the Optimizely UI for experiment: ${expName}`)
-  }
-
-  const optimizelyExp = await networkManager(
-    body,
-    endpoint,
-    reqMethod
-  );
   if (!optimizelyExp.success) {
     console.log(`⚠️ Unable to create Optimizely experiment. ${optimizelyExp.code} - ${optimizelyExp.message}`);
   }
