@@ -102,23 +102,3 @@ const addToExpCustomGoals = async (expID, brand, event) => {
         }
       );
 }
-
-const postToOptimizely = async (reqBody, endpoint) => {
-    const options = {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-        authorization: OPTLY_TOKEN,
-      },
-      body: JSON.stringify(reqBody),
-    };
-  
-    try {
-      const res = await fetch(endpoint, options);
-      const resource = await res.json();
-      return resource;
-    } catch(error) {
-      console.log("error in try catch ", error)
-    }
-  };
