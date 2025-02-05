@@ -1,4 +1,5 @@
 const fs = require("fs");
+const { networkManager } = require("./networkManager");
 const fsp = fs.promises;
 const args = process.argv;
 require("dotenv").config();
@@ -165,7 +166,7 @@ const createOptimizelyPage = async (expName, projectID, activation, urlCondition
       reqMethod = "POST";
       console.log(`⚙️ Creating a new PAGE in the Optimizely UI for experiment: ${expName}`)
     }
-    const optimizelyPage = await postToOptimizely(
+    const optimizelyPage = await networkManager(
       body,
       endpoint,
       reqMethod
@@ -298,7 +299,7 @@ const createOptimizelyExperiment = async (
     console.log(`⚙️ Creating a new experiment in the Optimizely UI for experiment: ${expName}`)
   }
 
-  const optimizelyExp = await postToOptimizely(
+  const optimizelyExp = await networkManager(
     body,
     endpoint,
     reqMethod
@@ -307,22 +308,6 @@ const createOptimizelyExperiment = async (
     console.log(`⚠️ Unable to create Optimizely experiment. ${optimizelyExp.code} - ${optimizelyExp.message}`);
   }
   return optimizelyExp;
-};
-
-const postToOptimizely = async (reqBody, endpoint, reqMethod) => {
-  const options = {
-    method: reqMethod,
-    headers: {
-      accept: "application/json",
-      "content-type": "application/json",
-      authorization: OPTLY_TOKEN,
-    },
-    body: JSON.stringify(reqBody),
-  };
-
-    const res = await fetch(endpoint, options)
-    const resource = await res.json();
-    return resource && resource.id ? {...resource, success: true} : {...resource, success: false};
 };
 
 const updateConfigFile = (expID, brand, configFile, key, resourceID) => {

@@ -190,7 +190,7 @@ const createExperimentScaffolding = (
       });
       fs.writeFileSync(
         `./experiments/${expID}/${brand.name}/targeting/callback.js`,
-        `/ **
+        `/**
             * Sample Activation Function
             * For complete documentation, see https://docs.developers.optimizely.com/web/docs/dynamic-websites#section-callback
             * @param {Function} activate - Call this function when you want to activate the page.
