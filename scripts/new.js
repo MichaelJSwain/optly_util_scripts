@@ -104,7 +104,8 @@ const createConfigFile = (expID, expName, numVariants, brand, projectID, editorU
         {
             "name": "variant${index}",
             "js": "./experiments/${expID}/${brand}/variations/variation${index}/index.js",
-            "css": "./experiments/${expID}/${brand}/variations/variation${index}/index.css"
+            "css": "./experiments/${expID}/${brand}/variations/variation${index}/index.css",
+            "optimizely_variation_id": ""
         }
     `;
   });
