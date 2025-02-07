@@ -391,6 +391,13 @@ const cowe = async () => {
                 );
 
                 if (optlyExperiment && optlyExperiment.id && !configFile.OptimizelyExperimentID) {
+                  const variationIDs = optlyExperiment.variations.map(variation => variation.variation_id);
+
+                  variationIDs.forEach((id, idx) => {
+                    configFile.variants[idx].optimizely_variation_id = id
+                  });
+                  console.log(configFile);
+
                   updateConfigFile(expID, brand, configFile, 'OptimizelyExperimentID', optlyExperiment.id);
                 } 
           }
