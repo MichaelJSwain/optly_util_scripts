@@ -3,6 +3,7 @@ console.log("new custom goal file");
 const inquirer = require("inquirer");
 const fs = require("fs");
 const { networkManager } = require("./networkManager");
+const { createEventEndpoint } = require("../endpoints/createEventEndpoint");
 const fsp = fs.promises;
 require("dotenv").config();
 const { OPTLY_TOKEN, CK_PROJECT_ID, TH_PROJECT_ID } = process.env;
@@ -67,11 +68,12 @@ prompt(questions).then(async (answers) => {
     const fullGoalName = `${expID} - ${goalName}`;
     
     const apiKeyForGoal = fullGoalName.toLowerCase().split(" ").join("_");
-    const reqBody = {key: apiKeyForGoal, name: fullGoalName};
+    const body = {key: apiKeyForGoal, name: fullGoalName};
     let brands = brand === "DB" ? ["TH", "CK"] : [brand];
 
     for (const brand of brands) {
-      const event = await networkManager(reqBody, `https://api.optimizely.com/v2/projects/${projectID[brand]}/custom_events`, "POST");
+      const optimizelyRequest = createEventEndpoint(body, projectID[brand]);
+      const event = await networkManager(optimizelyRequest);
       console.log("event = ", event);
       if (event && event.id && addGoalToExp.toUpperCase() === "Y") {
           console.log("adding event to experiment... ")
@@ -102,23 +104,3 @@ const addToExpCustomGoals = async (expID, brand, event) => {
         }
       );
 }
-
-const postToOptimizely = async (reqBody, endpoint) => {
-    const options = {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-        authorization: OPTLY_TOKEN,
-      },
-      body: JSON.stringify(reqBody),
-    };
-  
-    try {
-      const res = await fetch(endpoint, options);
-      const resource = await res.json();
-      return resource;
-    } catch(error) {
-      console.log("error in try catch ", error)
-    }
-  };
