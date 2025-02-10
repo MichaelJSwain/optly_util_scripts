@@ -226,9 +226,11 @@ const createVariantActions = (pageID, variants) => {
       weight: variant.trafficAllocation,
       description: "variant description",
       archived: false,
-      actions: variantActions,
-      variation_id: variant.optimizely_variant_id
+      actions: variantActions
     };
+    if (variant.optimizely_variant_id) {
+      variantData.variation_id = variant.optimizely_variant_id;
+    }
     variantsArray.push(variantData);
   });
   return variantsArray;
