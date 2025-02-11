@@ -1,18 +1,76 @@
 import 'dotenv/config'
 const { OPTLY_TOKEN } = process.env;
 
-export const networkManager = async ({reqBody, endpoint, reqMethod}) => {
+export const networkManager = {
+  createRequestObject: (req_body, req_method) => {
     const options = {
-        method: reqMethod,
+        method: req_method,
         headers: {
           accept: "application/json",
           "content-type": "application/json",
           authorization: OPTLY_TOKEN,
         },
-        body: JSON.stringify(reqBody),
+        body: JSON.stringify(req_body),
       };
     
-      const res = await fetch(endpoint, options)
-      const resource = await res.json();
-      return resource && resource.id ? {...resource, success: true} : {...resource, success: false};
+      return options
+  },
+  call: async (endpoint, req_object) => {
+    const res = await fetch(endpoint, req_object);
+    const resource = await res.json();
+    return resource && resource.id ? {...resource, success: true} : {...resource, success: false};
+  },
+  initiateRequest: () => {
+    // const request_object = networkManager.createRequestObject(req_body, req_method);
+    // const res = await networkManager.call(endpoint, request_object);
+    // return res;
+  },
+  createExperiment: async (req_body) => {
+    const endpoint = "https://api.optimizely.com/v2/experiments";
+    const req_method = "POST";
+
+    const request_object = networkManager.createRequestObject(req_body, req_method);
+    const res = await networkManager.call(endpoint, request_object);
+    return res;
+  },
+  updateExperiment: async (req_body, exp_id) => {
+    const endpoint = `https://api.optimizely.com/v2/experiments/${exp_id}`;
+    const req_method = "PATCH";
+
+    const request_object = networkManager.createRequestObject(req_body, req_method);
+    const res = await networkManager.call(endpoint, request_object);
+    return res;
+  },
+  createPage: async (req_body) => {
+    const endpoint = `https://api.optimizely.com/v2/pages`;
+    const req_method = "POST";
+
+    const request_object = networkManager.createRequestObject(req_body, req_method);
+    const res = await networkManager.call(endpoint, request_object);
+    return res;
+  },
+  updatePage: async (req_body, exp_id) => {
+    const endpoint = `https://api.optimizely.com/v2/pages/${exp_id}`;
+    const req_method = "PATCH";
+
+    const request_object = networkManager.createRequestObject(req_body, req_method);
+    const res = await networkManager.call(endpoint, request_object);
+    return res;
+  },
+  createEvent: async (req_body, project_id) => {
+    const endpoint = `https://api.optimizely.com/v2/projects/${project_id}/custom_events`;
+    const req_method = "POST";
+
+    const request_object = networkManager.createRequestObject(req_body, req_method);
+    const res = await networkManager.call(endpoint, request_object);
+    return res;
+  },
+  setEperimentStatus: async (req_body, exp_id, action) => {
+    const endpoint = `https://api.optimizely.com/v2/experiments/${exp_id}?action=${action}`;
+    const req_method = "PATCH";
+
+    const request_object = networkManager.createRequestObject(req_body, req_method);
+    const res = await networkManager.call(endpoint, request_object);
+    return res;
+  }
 }

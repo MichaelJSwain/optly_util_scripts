@@ -1,9 +1,5 @@
 const fs = require("fs");
 const { networkManager } = require("./networkManager");
-const { updatePageEndpoint } = require("../endpoints/updatePageEndpoint");
-const { updateExperimentEndpoint } = require("../endpoints/updateExperimentEndpoint");
-const { createExperimentEndpoint } = require("../endpoints/createExperimentEndpoint");
-const { createPageEndpoint } = require("../endpoints/createPageEndpoint");
 const fsp = fs.promises;
 const args = process.argv;
 require("dotenv").config();
@@ -159,8 +155,9 @@ const createOptimizelyPage = async (expName, projectID, activation, urlCondition
       activation_type: "callback",
     };
 
-    const optimizelyRequest = optlyPageID ? updatePageEndpoint(body, optlyPageID) : createPageEndpoint(body);
-    const optimizelyPage = await networkManager(optimizelyRequest);
+    const optimizelyPage = optlyPageID ? 
+      await networkManager.updatePage(body, optlyPageID) : 
+      await networkManager.createPage(body);
 
     if (!optimizelyPage.success) {
       console.log(`⚠️ Unable to create Optimizely page. ${optimizelyPage.code} - ${optimizelyPage.message}`);
@@ -281,8 +278,9 @@ const createOptimizelyExperiment = async (
     body.metrics = goals;
   }
 
-  const optimizelyRequest = OptimizelyExperimentID ? updateExperimentEndpoint(body, OptimizelyExperimentID) : createExperimentEndpoint(body);
-  const optimizelyExp = await networkManager(optimizelyRequest);
+  const optimizelyExp = OptimizelyExperimentID ? 
+    await networkManager.updateExperiment(body, OptimizelyExperimentID) : 
+    await networkManager.createExperiment(body);
 
   if (!optimizelyExp.success) {
     console.log(`⚠️ Unable to create Optimizely experiment. ${optimizelyExp.code} - ${optimizelyExp.message}`);
