@@ -53,7 +53,8 @@ const getCustomCode = async (id, brand, variants, activation) => {
   const variantsArr = [];
   // get variant code
   for (const variant of variants) {
-    const v = { name: variant.name, js: "", css: "" };
+ 
+    const v = { name: variant.name, js: "", css: "", optimizely_variant_id:  variant.optimizely_variation_id};
 
     const js = await fsp.readFile(`${variant.js}`, "binary");
     const parsedJS = validateCustomCode(js);
@@ -191,6 +192,7 @@ const createVariantActions = (pageID, variants) => {
   const variantsArray = [];
 
   variants.forEach((variant) => {
+    
     const variantActions =
       variant.js || variant.css
         ? [
@@ -224,8 +226,11 @@ const createVariantActions = (pageID, variants) => {
       weight: variant.trafficAllocation,
       description: "variant description",
       archived: false,
-      actions: variantActions,
+      actions: variantActions
     };
+    if (variant.optimizely_variant_id) {
+      variantData.variation_id = variant.optimizely_variant_id;
+    }
     variantsArray.push(variantData);
   });
   return variantsArray;
@@ -342,7 +347,6 @@ const buildExp = async (configFile) => {
     editorUrl
   }
 
-  
   return builtExperiment;
 }
 
@@ -391,6 +395,12 @@ const cowe = async () => {
                 );
 
                 if (optlyExperiment && optlyExperiment.id && !configFile.OptimizelyExperimentID) {
+                  const variationIDs = optlyExperiment.variations.map(variation => variation.variation_id);
+
+                  variationIDs.forEach((id, idx) => {
+                    configFile.variants[idx].optimizely_variation_id = id
+                  });
+
                   updateConfigFile(expID, brand, configFile, 'OptimizelyExperimentID', optlyExperiment.id);
                 } 
           }

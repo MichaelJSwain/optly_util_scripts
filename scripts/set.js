@@ -1,7 +1,7 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
-require("dotenv").config();
-const { OPTLY_TOKEN } = process.env;
+const { setExperimentStatusEndpoint } = require("../endpoints/setExperimentStatusEndpoint");
+const { networkManager } = require("./networkManager");
 
 const validateExpParams = (expID, brands) => {
     let res = {
@@ -80,29 +80,19 @@ const questions = [
     const brands = brand === "DB" ? ["TH", "CK"] : [brand];
     const {isValid, message} = validateExpParams(expID, brands);
     if (isValid) {
-        brands.forEach(brand => {
+        brands.forEach(async brand => {
             const {OptimizelyExperimentID, name} = getConfigFile(expID, brand)
             if (OptimizelyExperimentID && name) {
                 console.log("⚙️ Updating experiment status... ");
-                const options = {
-                    method: 'PATCH',
-                    headers: {
-                      accept: 'application/json',
-                      'content-type': 'application/json',
-                      authorization: OPTLY_TOKEN
-                    },
-                    body: JSON.stringify({name: `[QA] - ${expID} - ${name}`})
-                  };
-                  
-                  fetch(`https://api.optimizely.com/v2/experiments/${OptimizelyExperimentID}?action=${action}`, options)
-                    .then(res => res.json())
-                    .then(res => {
-                        console.log(`✅ ${expID} ${brand} status successfully updated to '${res.status}' in the Optimizely UI`)
-                    })
-                    .catch(err => {
-                        console.log("⚠️ Unable to update the experiment status in the Optimizely UI");
-                        console.log(err);
-                    });
+                const body = {name: `[QA] - ${expID} - ${name}`};
+                const optimizelyRequest = setExperimentStatusEndpoint(body, OptimizelyExperimentID, action);
+                const res = await networkManager(optimizelyRequest);
+
+                if (res.success) {
+                  console.log(`✅ ${expID} ${brand} status successfully updated to '${res.status}' in the Optimizely UI`)
+                } else {
+                  console.log("⚠️ Unable to update the experiment status in the Optimizely UI");
+                }
             } else {
                 console.log(`⚠️ Unable to get OptimizelyExperimentID or name in the config file for path experiments/${expID}/${brand}/config.json`);
             }
