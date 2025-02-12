@@ -10,6 +10,7 @@ const { OPTLY_TOKEN,
         CK_QA_AUDIENCE_ID,
         CK_MB_AUDIENCE_ID,
         CK_DT_AUDIENCE_ID } = process.env;
+const { getConfigFile } = require("./getConfigFile");
 
 const getUserInput = () => {
   const userInput =
@@ -21,23 +22,6 @@ const getUserInput = () => {
     : false;
     return userInput;
 }
-
-const getConfigFile = async (expID, brand) => {
-  console.log(`⚙️ Getting config file for expID:${expID} brand:${brand}`)
-  let configFile = await fsp.readFile(
-    `./experiments/${expID}/${brand}/config.json`,
-    "binary"
-  )
-  .then(res => {
-    parsedConfig = JSON.parse(res);
-    return parsedConfig;
-  })
-  .catch(e => {
-    console.log(`⚠️ Config file not found for expID:${expID} brand:${brand}. Please check that the expID and brand are valid.`);
-    return false;
-  });
-  return configFile;
-};
 
 const validateCustomCode = (code) => {
   // remove escape characters to prevent request rejection
@@ -355,7 +339,7 @@ const cowe = async () => {
     let brands = brand === "DB" ? ["TH", "CK"] : [brand];
 
     for (const brand of brands) {
-      const configFile = await getConfigFile(expID, brand);
+      const configFile = getConfigFile(expID, brand);
       if (configFile) {
         const {
                 id,
