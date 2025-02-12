@@ -72,9 +72,8 @@ prompt(questions).then(async (answers) => {
     let brands = brand === "DB" ? ["TH", "CK"] : [brand];
 
     for (const brand of brands) {
-      const optimizelyRequest = createEventEndpoint(body, projectID[brand]);
-      const event = await networkManager(optimizelyRequest);
-      console.log("event = ", event);
+      const event = await networkManager.createEvent(body, projectID[brand]);
+      
       if (event && event.id && addGoalToExp.toUpperCase() === "Y") {
           console.log("adding event to experiment... ")
           addToExpCustomGoals(expID, brand, event);

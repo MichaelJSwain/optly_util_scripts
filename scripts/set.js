@@ -85,9 +85,8 @@ const questions = [
             if (OptimizelyExperimentID && name) {
                 console.log("⚙️ Updating experiment status... ");
                 const body = {name: `[QA] - ${expID} - ${name}`};
-                const optimizelyRequest = setExperimentStatusEndpoint(body, OptimizelyExperimentID, action);
-                const res = await networkManager(optimizelyRequest);
-
+                const res = await networkManager.setEperimentStatus(body, OptimizelyExperimentID, action);
+                
                 if (res.success) {
                   console.log(`✅ ${expID} ${brand} status successfully updated to '${res.status}' in the Optimizely UI`)
                 } else {
