@@ -3,7 +3,6 @@ console.log("new custom goal file");
 const inquirer = require("inquirer");
 const fs = require("fs");
 const { networkManager } = require("./networkManager");
-const { createEventEndpoint } = require("../endpoints/createEventEndpoint");
 const fsp = fs.promises;
 require("dotenv").config();
 const { OPTLY_TOKEN, CK_PROJECT_ID, TH_PROJECT_ID } = process.env;

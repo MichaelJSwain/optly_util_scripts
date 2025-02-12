@@ -1,7 +1,7 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
-const { setExperimentStatusEndpoint } = require("../endpoints/setExperimentStatusEndpoint");
 const { networkManager } = require("./networkManager");
+const { getConfigFile } = require("./getConfigFile");
 
 const validateExpParams = (expID, brands) => {
     let res = {
@@ -22,16 +22,6 @@ const validateExpParams = (expID, brands) => {
     }
     return res;
 }
-
-const getConfigFile = (expID, brand) => {
-    console.log(`⚙️ Getting config file for expID:${expID} brand:${brand}`)
-    let configFile = fs.readFileSync(
-      `./experiments/${expID}/${brand}/config.json`,
-      "binary"
-    )
-    configFile = JSON.parse(configFile);
-    return configFile;
-  };
 
 const questions = [
     {
@@ -81,7 +71,7 @@ const questions = [
     const {isValid, message} = validateExpParams(expID, brands);
     if (isValid) {
         brands.forEach(async brand => {
-            const {OptimizelyExperimentID, name} = getConfigFile(expID, brand)
+            const {OptimizelyExperimentID, name} = getConfigFile(expID, brand);
             if (OptimizelyExperimentID && name) {
                 console.log("⚙️ Updating experiment status... ");
                 const body = {name: `[QA] - ${expID} - ${name}`};
