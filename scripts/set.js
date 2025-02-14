@@ -2,24 +2,100 @@ const inquirer = require("inquirer");
 const fs = require("fs");
 const { networkManager } = require("./networkManager");
 const { getConfigFile } = require("./getConfigFile");
+require("dotenv").config();
+const { TH_QA_AUDIENCE_ID, CK_QA_AUDIENCE_ID } = process.env;
+
+const prompts = {
+  start: [
+    {
+      type: "input",
+      name: "answer",
+      message: "This experiment does not use the QA audience and will be exposed to real users. Are you sure you want to proceed? (y|n)",
+      validate: (val) => {
+        if (val.toLowerCase() === "y" || val.toLowerCase() === "n") {
+          return true;
+        } else {
+          return false;
+        }
+      },
+    }
+  ],
+  pause: [
+    {
+      type: "input",
+      name: "answer",
+      message: "Are you sure you want to pause a running experiment? (y|n)",
+      validate: (val) => {
+        if (val.toLowerCase() === "y" || val.toLowerCase() === "n") {
+          return true;
+        } else {
+          return false;
+        }
+      },
+    }
+  ],
+  publish: [
+    {
+      type: "input",
+      name: "answer",
+      message: "Are you sure you want to update a running experiment? In general, this is not a recommended action (see knowledge base link for more details) (y | n)",
+      validate: (val) => {
+        if (val.toLowerCase() === "y" || val.toLowerCase() === "n") {
+          return true;
+        } else {
+          return false;
+        }
+      },
+    }
+  ]
+}
+
+const promptUser = async (action) => {
+  console.log("prompting user");
+  const prompt = inquirer.createPromptModule();
+  const isSafe = await prompt(prompts[action]).then(async ({answer}) => {
+    const res = answer.toLowerCase() === "y" ? true : false;
+    return res;
+  });
+  return isSafe;
+}
 
 const isSafeToUpdateOptlyExperiment = async (optly_exp_id, action) => {
-  console.log("checking status of exp: ", optly_exp_id)
+  console.log("checking status of exp: ", optly_exp_id, action)
   const res = await networkManager.getExperiment(optly_exp_id);
   if (res.success) {
     const {audience_conditions, status} = res;
-    let warnUser = false;
-
-    if ((!audience_conditions.includes('5226595548397568') && !audience_conditions.includes('4873116552265728')) 
-        && status == 'running'
-        && action === 'pause') {
-      warnUser = 'Are you sure you want to pause a running experiment? (y|n)';
+    const isInQAmode = audience_conditions.includes(TH_QA_AUDIENCE_ID) || audience_conditions.includes(CK_QA_AUDIENCE_ID);
+ 
+    if (isInQAmode) {
+      return true;
     }
-    
-    console.log("warn user ? ", warnUser);
+
+    if (
+      !isInQAmode &&
+      (status == 'paused' || status === 'not_started') &&
+      action === 'start'
+    ) {
+      const res = await promptUser('start');
+      return res;
+    } else if (
+      !isInQAmode &&
+      status == 'running' &&
+      action === 'pause'
+    ) {
+      const res = await promptUser('pause');
+      return res;
+    } else if (
+      !isInQAmode && 
+      status == 'running' &&
+      action == 'publish'
+    ) {
+      console.log("trying to update a running tests");
+      const res = await promptUser('publish');
+      return res;
+    }
   }
 }
-
 
 const validateExpParams = (expID, brands) => {
     let res = {
@@ -91,16 +167,23 @@ const questions = [
         brands.forEach(async brand => {
             const {OptimizelyExperimentID, name} = getConfigFile(expID, brand);
             if (OptimizelyExperimentID && name) {
-                const isSafe = isSafeToUpdateOptlyExperiment(OptimizelyExperimentID, action);
-                console.log("⚙️ Updating experiment status... ");
-                // const body = {name: `[QA] - ${expID} - ${name}`};
-                // const res = await networkManager.setEperimentStatus(body, OptimizelyExperimentID, action);
-                
-                // if (res.success) {
-                //   console.log(`✅ ${expID} ${brand} status successfully updated to '${res.status}' in the Optimizely UI`)
-                // } else {
-                //   console.log("⚠️ Unable to update the experiment status in the Optimizely UI");
-                // }
+                const isSafe = await isSafeToUpdateOptlyExperiment(OptimizelyExperimentID, action);
+
+                if (isSafe) {
+                  console.log("is safe to update experiment");
+                  console.log("⚙️ Updating experiment status... ");
+                  const body = {name: `[QA] - ${expID} - ${name}`};
+                  const res = await networkManager.setEperimentStatus(body, OptimizelyExperimentID, action);
+                  
+                  if (res.success) {
+                    console.log(`✅ ${expID} ${brand} status successfully updated to '${res.status}' in the Optimizely UI`)
+                  } else {
+                    console.log("⚠️ Unable to update the experiment status in the Optimizely UI");
+                  }
+                } else {
+                  console.log("is NOT safe to update experiment");
+                }
+
             } else {
                 console.log(`⚠️ Unable to get OptimizelyExperimentID or name in the config file for path experiments/${expID}/${brand}/config.json`);
             }
