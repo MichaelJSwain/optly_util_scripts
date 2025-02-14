@@ -164,30 +164,28 @@ const questions = [
     const brands = brand === "DB" ? ["TH", "CK"] : [brand];
     const {isValid, message} = validateExpParams(expID, brands);
     if (isValid) {
-        brands.forEach(async brand => {
+      for (const brand of brands) {
             const {OptimizelyExperimentID, name} = getConfigFile(expID, brand);
             if (OptimizelyExperimentID && name) {
                 const isSafe = await isSafeToUpdateOptlyExperiment(OptimizelyExperimentID, action);
 
                 if (isSafe) {
-                  console.log("is safe to update experiment");
-                  console.log("⚙️ Updating experiment status... ");
+                  console.log(`⚙️ Updating id: '${expID}' project: '${brand}' to status: '${action}'... `);
                   const body = {name: `[QA] - ${expID} - ${name}`};
                   const res = await networkManager.setEperimentStatus(body, OptimizelyExperimentID, action);
                   
                   if (res.success) {
-                    console.log(`✅ ${expID} ${brand} status successfully updated to '${res.status}' in the Optimizely UI`)
+                    console.log(`✅ id: '${expID}' project: '${brand}' successfully updated to status: '${res.status}' in the Optimizely UI`)
                   } else {
-                    console.log("⚠️ Unable to update the experiment status in the Optimizely UI");
+                    console.log(`⚠️ Unable to update id: '${expID}' project: '${brand}' to status: '${res.status}' in the Optimizely UI`);
                   }
                 } else {
-                  console.log("is NOT safe to update experiment");
+                  console.log(`⚠️  update id: '${expID}' project: '${brand}' action: ${action} has been cancelled.`);
                 }
-
             } else {
                 console.log(`⚠️ Unable to get OptimizelyExperimentID or name in the config file for path experiments/${expID}/${brand}/config.json`);
             }
-        })
+          }
 
     } else {
         console.log(message);
