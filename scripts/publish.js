@@ -4,7 +4,7 @@ const args = process.argv;
 require("dotenv").config();
 const { getConfigFile } = require("./getConfigFile");
 const {buildExp} = require("./build");
-const isSafeToUpdateOptlyExperiment = require("./checkExpStatus");
+const isSafeToUpdateOptimizelyExperiment = require("./checkExpStatus");
 
 const getUserInput = () => {
   const userInput =
@@ -179,59 +179,55 @@ const publish = async () => {
       const configFile = getConfigFile(expID, brand);
       if (configFile) {
 
-        const isSafe = await isSafeToUpdateOptlyExperiment(configFile.OptimizelyExperimentID, "publish");
+        const isSafe = await isSafeToUpdateOptimizelyExperiment(configFile.OptimizelyExperimentID, "publish");
 
         if (isSafe) {
-        const {
-                id,
-                name, 
-                projectID, 
-                callback, 
-                optlyAudiences, 
-                optlyGoals, 
-                variantCode, 
-                sharedCode, 
-                urlConditions, 
-                editorUrl, 
-                OptimizelyExperimentID
-            } = await buildExp(configFile);
-            
-   
-          
-              const expName = `${id} - ${name}`;
+          const {
+                  id,
+                  name, 
+                  projectID, 
+                  callback, 
+                  optlyAudiences, 
+                  optlyGoals, 
+                  variantCode, 
+                  sharedCode, 
+                  urlConditions, 
+                  editorUrl, 
+                  OptimizelyExperimentID
+              } = await buildExp(configFile);
 
-              const optlyPage = await createOptimizelyPage(expName, projectID, callback, urlConditions, editorUrl, configFile.OptimizelyPageID);
-              const optlyPageID = optlyPage.id ? optlyPage.id : optlyPage;
+            const expName = `${id} - ${name}`;
 
-              if (optlyPageID) {
-                    if (!configFile.OptimizelyPageID) {
-                        updateConfigFile(expID, brand, configFile, 'OptimizelyPageID', optlyPageID);
-                    }
+            const optlyPage = await createOptimizelyPage(expName, projectID, callback, urlConditions, editorUrl, configFile.OptimizelyPageID);
+            const optlyPageID = optlyPage.id ? optlyPage.id : optlyPage;
 
-                    const optlyExperiment = await createOptimizelyExperiment(
-                      expName,
-                      optlyPageID,
-                      projectID,
-                      optlyAudiences,
-                      optlyGoals,
-                      variantCode,
-                      sharedCode,
-                      configFile.OptimizelyExperimentID
-                    );
+            if (optlyPageID) {
+                  if (!configFile.OptimizelyPageID) {
+                      updateConfigFile(expID, brand, configFile, 'OptimizelyPageID', optlyPageID);
+                  }
 
-                    if (optlyExperiment && optlyExperiment.id && !configFile.OptimizelyExperimentID) {
-                      const variationIDs = optlyExperiment.variations.map(variation => variation.variation_id);
+                  const optlyExperiment = await createOptimizelyExperiment(
+                    expName,
+                    optlyPageID,
+                    projectID,
+                    optlyAudiences,
+                    optlyGoals,
+                    variantCode,
+                    sharedCode,
+                    configFile.OptimizelyExperimentID
+                  );
 
-                      variationIDs.forEach((id, idx) => {
-                        configFile.variants[idx].optimizely_variation_id = id
-                      });
+                  if (optlyExperiment && optlyExperiment.id && !configFile.OptimizelyExperimentID) {
+                    const variationIDs = optlyExperiment.variations.map(variation => variation.variation_id);
 
-                      updateConfigFile(expID, brand, configFile, 'OptimizelyExperimentID', optlyExperiment.id);
-                    } 
-              }
-            } else {
-              console.log("is not safe")
+                    variationIDs.forEach((id, idx) => {
+                      configFile.variants[idx].optimizely_variation_id = id
+                    });
+
+                    updateConfigFile(expID, brand, configFile, 'OptimizelyExperimentID', optlyExperiment.id);
+                  } 
             }
+        }
       }
     }
 

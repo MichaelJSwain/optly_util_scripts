@@ -57,16 +57,13 @@ const promptUser = async (action) => {
   return isSafe;
 }
 
-const isSafeToUpdateOptlyExperiment = async (optly_exp_id, action) => {
-  console.log("checking status of exp: ", optly_exp_id, action)
+const isSafeToUpdateOptimizelyExperiment = async (optly_exp_id, action) => {
   const res = await networkManager.getExperiment(optly_exp_id);
   
   if (res.success) {
     const {audience_conditions, status} = res;
     const isInQAmode = audience_conditions.includes(TH_QA_AUDIENCE_ID) || audience_conditions.includes(CK_QA_AUDIENCE_ID);
-    console.log(isInQAmode);
-    console.log(audience_conditions);
-    console.log(status);
+
     if (isInQAmode) {
       return true;
     }
@@ -76,24 +73,23 @@ const isSafeToUpdateOptlyExperiment = async (optly_exp_id, action) => {
       (status == 'paused' || status === 'not_started') &&
       action === 'start'
     ) {
-      const res = await promptUser('start');
-      return res;
+      const decision = await promptUser('start');
+      return decision;
     } else if (
       !isInQAmode &&
       status == 'running' &&
       action === 'pause'
     ) {
-      const res = await promptUser('pause');
-      return res;
+      const decision = await promptUser('pause');
+      return decision;
     } else if (
       !isInQAmode && 
       status == 'running' &&
       action == 'publish'
     ) {
-      console.log("trying to update a running tests");
-      const res = await promptUser('publish');
-      return res;
+      const decision = await promptUser('publish');
+      return decision;
     }
   }
 }
-module.exports = isSafeToUpdateOptlyExperiment;
+module.exports = isSafeToUpdateOptimizelyExperiment;

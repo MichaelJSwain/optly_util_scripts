@@ -2,7 +2,7 @@ const inquirer = require("inquirer");
 const fs = require("fs");
 const { networkManager } = require("./networkManager");
 const { getConfigFile } = require("./getConfigFile");
-const isSafeToUpdateOptlyExperiment = require("./checkExpStatus");
+const isSafeToUpdateOptimizelyExperiment = require("./checkExpStatus");
 require("dotenv").config();
 
 const validateExpParams = (expID, brands) => {
@@ -75,7 +75,7 @@ const questions = [
       for (const brand of brands) {
             const {OptimizelyExperimentID, name} = getConfigFile(expID, brand);
             if (OptimizelyExperimentID && name) {
-                const isSafe = await isSafeToUpdateOptlyExperiment(OptimizelyExperimentID, action);
+                const isSafe = await isSafeToUpdateOptimizelyExperiment(OptimizelyExperimentID, action);
 
                 if (isSafe) {
                   console.log(`⚙️ Updating id: '${expID}' project: '${brand}' to status: '${action}'... `);
@@ -85,13 +85,13 @@ const questions = [
                   if (res.success) {
                     console.log(`✅ id: '${expID}' project: '${brand}' successfully updated to status: '${res.status}' in the Optimizely UI`)
                   } else {
-                    console.log(`⚠️ Unable to update id: '${expID}' project: '${brand}' to status: '${res.status}' in the Optimizely UI`);
+                    console.log(`⚠️ Unable to update experiment id: '${expID}', in project: '${brand}', to status: '${res.status}' in the Optimizely UI`);
                   }
                 } else {
-                  console.log(`⚠️  update id: '${expID}' project: '${brand}' action: ${action} has been cancelled.`);
+                  console.log(`⚠️  update to experiment id: '${expID}', in project: '${brand}', with action: ${action} has been cancelled.`);
                 }
             } else {
-                console.log(`⚠️ Unable to get OptimizelyExperimentID or name in the config file for path experiments/${expID}/${brand}/config.json`);
+                console.log(`⚠️ Unable to get Optimizely experiment ID or name in the config file for path experiments/${expID}/${brand}/config.json`);
             }
           }
 
