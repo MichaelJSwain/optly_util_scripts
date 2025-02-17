@@ -175,9 +175,8 @@ const publish = async () => {
   console.log(userInput);
   if (userInput) {
     const { expID, brand } = userInput;
-    // let brands = brand === "DB" ? ["TH", "CK"] : [brand];
     let brands = optimizelyProjects[brand.toLowerCase()];
-    // console.log("brands returned in publish = ", brands);
+    
     for (const brand of brands) {
       const configFile = getConfigFile(expID, brand.name);
 
