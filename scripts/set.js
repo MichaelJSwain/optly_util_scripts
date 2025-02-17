@@ -3,6 +3,7 @@ const fs = require("fs");
 const { networkManager } = require("./networkManager");
 const { getConfigFile } = require("./getConfigFile");
 const isSafeToUpdateOptimizelyExperiment = require("./checkExpStatus");
+const optimizelyProjects = require("../optimizelyProjects");
 require("dotenv").config();
 
 const validateExpParams = (expID, brands) => {
@@ -13,7 +14,7 @@ const validateExpParams = (expID, brands) => {
     const expIDexists = fs.existsSync(`./experiments/${expID}`);
     if (expIDexists) {
         brands.forEach(brand => {
-            if (!fs.existsSync(`./experiments/${expID}/${brand}`)) {
+            if (!fs.existsSync(`./experiments/${expID}/${brand.name}`)) {
                 res.isValid = false;
                 res.message = "⚠️ The brand for this experiment ID was not found."
             }
@@ -69,29 +70,29 @@ const questions = [
     let { brand, expID, action } = answers;
     brand = brand.toUpperCase();
     expID = expID.toUpperCase();
-    const brands = brand === "DB" ? ["TH", "CK"] : [brand];
+    let brands = optimizelyProjects[brand.toLowerCase()];
     const {isValid, message} = validateExpParams(expID, brands);
     if (isValid) {
       for (const brand of brands) {
-            const {OptimizelyExperimentID, name} = getConfigFile(expID, brand);
+            const {OptimizelyExperimentID, name} = getConfigFile(expID, brand.name);
             if (OptimizelyExperimentID && name) {
                 const isSafe = await isSafeToUpdateOptimizelyExperiment(OptimizelyExperimentID, action);
 
                 if (isSafe) {
-                  console.log(`⚙️ Updating id: '${expID}' project: '${brand}' to status: '${action}'... `);
+                  console.log(`⚙️ Updating id: '${expID}' project: '${brand.name}' to status: '${action}'... `);
                   const body = {name: `[QA] - ${expID} - ${name}`};
                   const res = await networkManager.setEperimentStatus(body, OptimizelyExperimentID, action);
                   
                   if (res.success) {
-                    console.log(`✅ id: '${expID}' project: '${brand}' successfully updated to status: '${res.status}' in the Optimizely UI`)
+                    console.log(`✅ id: '${expID}' project: '${brand.name}' successfully updated to status: '${res.status}' in the Optimizely UI`)
                   } else {
-                    console.log(`⚠️ Unable to update experiment id: '${expID}', in project: '${brand}', to status: '${res.status}' in the Optimizely UI`);
+                    console.log(`⚠️ Unable to update experiment id: '${expID}', in project: '${brand.name}', to status: '${res.status}' in the Optimizely UI`);
                   }
                 } else {
-                  console.log(`⚠️  update to experiment id: '${expID}', in project: '${brand}', with action: ${action} has been cancelled.`);
+                  console.log(`⚠️  update to experiment id: '${expID}', in project: '${brand.name}', with action: ${action} has been cancelled.`);
                 }
             } else {
-                console.log(`⚠️ Unable to get Optimizely experiment ID or name in the config file for path experiments/${expID}/${brand}/config.json`);
+                console.log(`⚠️ Unable to get Optimizely experiment ID or name in the config file for path experiments/${expID}/${brand.name}/config.json`);
             }
           }
 
