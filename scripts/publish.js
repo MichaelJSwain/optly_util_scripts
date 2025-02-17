@@ -4,6 +4,7 @@ const args = process.argv;
 require("dotenv").config();
 const { getConfigFile } = require("./getConfigFile");
 const {buildExp} = require("./build");
+const isSafeToUpdateOptlyExperiment = require("./checkExpStatus");
 
 const getUserInput = () => {
   const userInput =
@@ -177,6 +178,10 @@ const publish = async () => {
     for (const brand of brands) {
       const configFile = getConfigFile(expID, brand);
       if (configFile) {
+
+        const isSafe = await isSafeToUpdateOptlyExperiment(configFile.OptimizelyExperimentID, "publish");
+
+        if (isSafe) {
         const {
                 id,
                 name, 
@@ -190,38 +195,43 @@ const publish = async () => {
                 editorUrl, 
                 OptimizelyExperimentID
             } = await buildExp(configFile);
+            
    
-          const expName = `${id} - ${name}`;
+          
+              const expName = `${id} - ${name}`;
 
-          const optlyPage = await createOptimizelyPage(expName, projectID, callback, urlConditions, editorUrl, configFile.OptimizelyPageID);
-          const optlyPageID = optlyPage.id ? optlyPage.id : optlyPage;
+              const optlyPage = await createOptimizelyPage(expName, projectID, callback, urlConditions, editorUrl, configFile.OptimizelyPageID);
+              const optlyPageID = optlyPage.id ? optlyPage.id : optlyPage;
 
-          if (optlyPageID) {
-                if (!configFile.OptimizelyPageID) {
-                    updateConfigFile(expID, brand, configFile, 'OptimizelyPageID', optlyPageID);
-                }
+              if (optlyPageID) {
+                    if (!configFile.OptimizelyPageID) {
+                        updateConfigFile(expID, brand, configFile, 'OptimizelyPageID', optlyPageID);
+                    }
 
-                const optlyExperiment = await createOptimizelyExperiment(
-                  expName,
-                  optlyPageID,
-                  projectID,
-                  optlyAudiences,
-                  optlyGoals,
-                  variantCode,
-                  sharedCode,
-                  configFile.OptimizelyExperimentID
-                );
+                    const optlyExperiment = await createOptimizelyExperiment(
+                      expName,
+                      optlyPageID,
+                      projectID,
+                      optlyAudiences,
+                      optlyGoals,
+                      variantCode,
+                      sharedCode,
+                      configFile.OptimizelyExperimentID
+                    );
 
-                if (optlyExperiment && optlyExperiment.id && !configFile.OptimizelyExperimentID) {
-                  const variationIDs = optlyExperiment.variations.map(variation => variation.variation_id);
+                    if (optlyExperiment && optlyExperiment.id && !configFile.OptimizelyExperimentID) {
+                      const variationIDs = optlyExperiment.variations.map(variation => variation.variation_id);
 
-                  variationIDs.forEach((id, idx) => {
-                    configFile.variants[idx].optimizely_variation_id = id
-                  });
+                      variationIDs.forEach((id, idx) => {
+                        configFile.variants[idx].optimizely_variation_id = id
+                      });
 
-                  updateConfigFile(expID, brand, configFile, 'OptimizelyExperimentID', optlyExperiment.id);
-                } 
-          }
+                      updateConfigFile(expID, brand, configFile, 'OptimizelyExperimentID', optlyExperiment.id);
+                    } 
+              }
+            } else {
+              console.log("is not safe")
+            }
       }
     }
 
