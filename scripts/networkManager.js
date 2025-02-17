@@ -1,4 +1,5 @@
 import 'dotenv/config'
+// import { checkExpStatus } from './checkExpStatus';
 const { OPTLY_TOKEN } = process.env;
 
 export const networkManager = {
@@ -9,11 +10,12 @@ export const networkManager = {
           accept: "application/json",
           "content-type": "application/json",
           authorization: OPTLY_TOKEN,
-        },
-        body: JSON.stringify(req_body),
+        }
       };
-    
-      return options
+      if (req_body) {
+        options.body = JSON.stringify(req_body)
+      }
+      return options;
   },
   call: async (endpoint, req_object) => {
     const res = await fetch(endpoint, req_object);
@@ -70,6 +72,15 @@ export const networkManager = {
     const req_method = "PATCH";
 
     const request_object = networkManager.createRequestObject(req_body, req_method);
+    const res = await networkManager.call(endpoint, request_object);
+    return res;
+  },
+  getExperiment: async (exp_id) => {
+    console.log("checking experiment status");
+    const endpoint = `https://api.optimizely.com/v2/experiments/${exp_id}`;
+    const req_method = "GET";
+
+    const request_object = networkManager.createRequestObject(undefined, req_method);
     const res = await networkManager.call(endpoint, request_object);
     return res;
   }

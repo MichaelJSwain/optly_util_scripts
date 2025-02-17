@@ -3,7 +3,7 @@ const fs = require("fs");
 require("dotenv").config();
 const { TH_PROJECT_ID, CK_PROJECT_ID } = process.env;
 
-const questions = [
+const questions = [ 
   {
     type: "input",
     name: "expID",
