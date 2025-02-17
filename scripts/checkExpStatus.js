@@ -2,6 +2,7 @@ const inquirer = require("inquirer");
 const { networkManager } = require("./networkManager");
 const { TH_QA_AUDIENCE_ID, CK_QA_AUDIENCE_ID } = process.env;
 
+
 const prompts = {
   start: [
     {
@@ -63,7 +64,9 @@ const isSafeToUpdateOptimizelyExperiment = async (optly_exp_id, action) => {
   if (res.success) {
     const {audience_conditions, status} = res;
     const isInQAmode = audience_conditions.includes(TH_QA_AUDIENCE_ID) || audience_conditions.includes(CK_QA_AUDIENCE_ID);
-
+    console.log(isInQAmode);
+    console.log(audience_conditions);
+    console.log(status);
     if (isInQAmode) {
       return true;
     }
@@ -89,6 +92,8 @@ const isSafeToUpdateOptimizelyExperiment = async (optly_exp_id, action) => {
     ) {
       const decision = await promptUser('publish');
       return decision;
+    } else {
+      return true;
     }
   }
 }

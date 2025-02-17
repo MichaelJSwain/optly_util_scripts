@@ -5,6 +5,7 @@ require("dotenv").config();
 const { getConfigFile } = require("./getConfigFile");
 const {buildExp} = require("./build");
 const isSafeToUpdateOptimizelyExperiment = require("./checkExpStatus");
+const optimizelyProjects = require("../optimizelyProjects");
 
 const getUserInput = () => {
   const userInput =
@@ -171,16 +172,19 @@ const updateConfigFile = (expID, brand, configFile, key, resourceID) => {
 
 const publish = async () => {
   const userInput = getUserInput();
+  console.log(userInput);
   if (userInput) {
     const { expID, brand } = userInput;
-    let brands = brand === "DB" ? ["TH", "CK"] : [brand];
-
+    // let brands = brand === "DB" ? ["TH", "CK"] : [brand];
+    let brands = optimizelyProjects[brand.toLowerCase()];
+    // console.log("brands returned in publish = ", brands);
     for (const brand of brands) {
-      const configFile = getConfigFile(expID, brand);
+      const configFile = getConfigFile(expID, brand.name);
+
       if (configFile) {
 
-        const isSafe = await isSafeToUpdateOptimizelyExperiment(configFile.OptimizelyExperimentID, "publish");
-
+        const isSafe = configFile.OptimizelyExperimentID ? await isSafeToUpdateOptimizelyExperiment(configFile.OptimizelyExperimentID, "publish") : true;
+        console.log(isSafe);
         if (isSafe) {
           const {
                   id,
@@ -203,7 +207,7 @@ const publish = async () => {
 
             if (optlyPageID) {
                   if (!configFile.OptimizelyPageID) {
-                      updateConfigFile(expID, brand, configFile, 'OptimizelyPageID', optlyPageID);
+                      updateConfigFile(expID, brand.name, configFile, 'OptimizelyPageID', optlyPageID);
                   }
 
                   const optlyExperiment = await createOptimizelyExperiment(
@@ -224,7 +228,7 @@ const publish = async () => {
                       configFile.variants[idx].optimizely_variation_id = id
                     });
 
-                    updateConfigFile(expID, brand, configFile, 'OptimizelyExperimentID', optlyExperiment.id);
+                    updateConfigFile(expID, brand.name, configFile, 'OptimizelyExperimentID', optlyExperiment.id);
                   } 
             }
         }
