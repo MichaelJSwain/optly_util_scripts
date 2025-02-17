@@ -1,6 +1,6 @@
-import * as fs from 'fs';
+const fs = require("fs");
 const fsp = fs.promises;
-import 'dotenv/config'
+require("dotenv").config();
 const { TH_QA_AUDIENCE_ID,
         TH_MB_AUDIENCE_ID,
         TH_DT_AUDIENCE_ID,
@@ -123,7 +123,7 @@ const getCustomCode = async (id, brand, variants, activation) => {
     }
   };
 
-export const buildExp = async (configFile) => {
+const buildExp = async (configFile) => {
     console.log("⚙️ Building experiment... ");
         const {
         name,
@@ -165,3 +165,5 @@ export const buildExp = async (configFile) => {
   
     return builtExperiment;
   }
+
+  module.exports = buildExp;

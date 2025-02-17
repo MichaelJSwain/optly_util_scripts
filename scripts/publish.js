@@ -3,7 +3,7 @@ const { networkManager } = require("./networkManager");
 const args = process.argv;
 require("dotenv").config();
 const { getConfigFile } = require("./getConfigFile");
-const {buildExp} = require("./build");
+const buildExp = require("./build");
 const isSafeToUpdateOptimizelyExperiment = require("./checkExpStatus");
 const optimizelyProjects = require("../optimizelyProjects");
 
@@ -176,7 +176,7 @@ const publish = async () => {
   if (userInput) {
     const { expID, brand } = userInput;
     let brands = optimizelyProjects[brand.toLowerCase()];
-    
+
     for (const brand of brands) {
       const configFile = getConfigFile(expID, brand.name);
 
