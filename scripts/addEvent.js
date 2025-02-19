@@ -97,7 +97,7 @@ const addToExpCustomGoals = async (expID, brand, event) => {
         (err) => {
           if (err) console.log(err);
           else {
-            console.log("File written successfully\n");
+            console.log(`✅ Successfully updated config file for exp id: ${expID}, in project: ${brand}`);
           }
         }
       );
