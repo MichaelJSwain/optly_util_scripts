@@ -6,6 +6,31 @@ const { getConfigFile } = require("./getConfigFile");
 const buildExp = require("./build");
 const isSafeToUpdateOptimizelyExperiment = require("./checkExpStatus");
 const optimizelyProjects = require("../optimizelyProjects");
+const inquirer = require("inquirer");
+
+const questions = [ 
+  {
+    type: "input",
+    name: "expID",
+    message: "Experiment ID:",
+    validate: (val) => {
+      return true;
+    },
+  },
+  {
+    type: "input",
+    name: "brand",
+    message: "Which brand(s)? (TH / CK / DB)",
+    validate: (val) => {
+      if (val.toLowerCase() != "th" && val.toLowerCase() != "ck" && val.toLowerCase() != "db") {
+        return "The experiment should target TH / CK / DB";
+      } else {
+        return true;
+      }
+    },
+  }
+];
+
 
 const getUserInput = () => {
   const userInput =
@@ -171,10 +196,11 @@ const updateConfigFile = (expID, brand, configFile, key, resourceID) => {
 };
 
 const publish = async () => {
-  const userInput = getUserInput();
-  if (userInput) {
-    const { expID, brand } = userInput;
-    let brands = optimizelyProjects[brand.toLowerCase()];
+  const prompt = inquirer.createPromptModule();
+  prompt(questions).then(async (answers) => {
+    const {expID, brand} = answers;
+    
+    const brands = optimizelyProjects[brand.toLowerCase()];
 
     for (const brand of brands) {
       const configFile = getConfigFile(expID, brand.name);
@@ -232,11 +258,7 @@ const publish = async () => {
         }
       }
     }
+  });
 
-  } else {
-    console.log(
-      "please specify the ID and brand for the Optimizely experiment you'd like to create e.g. CX100 TH"
-    );
-  }
 };
 publish();
