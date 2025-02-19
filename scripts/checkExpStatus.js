@@ -49,7 +49,6 @@ const prompts = {
 }
 
 const promptUser = async (action) => {
-  console.log("prompting user");
   const prompt = inquirer.createPromptModule();
   const isSafe = await prompt(prompts[action]).then(async ({answer}) => {
     const res = answer.toLowerCase() === "y" ? true : false;
@@ -64,9 +63,6 @@ const isSafeToUpdateOptimizelyExperiment = async (optly_exp_id, action) => {
   if (res.success) {
     const {audience_conditions, status} = res;
     const isInQAmode = audience_conditions.includes(TH_QA_AUDIENCE_ID) || audience_conditions.includes(CK_QA_AUDIENCE_ID);
-    console.log(isInQAmode);
-    console.log(audience_conditions);
-    console.log(status);
     if (isInQAmode) {
       return true;
     }
