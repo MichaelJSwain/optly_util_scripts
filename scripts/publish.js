@@ -172,7 +172,6 @@ const updateConfigFile = (expID, brand, configFile, key, resourceID) => {
 
 const publish = async () => {
   const userInput = getUserInput();
-  console.log(userInput);
   if (userInput) {
     const { expID, brand } = userInput;
     let brands = optimizelyProjects[brand.toLowerCase()];

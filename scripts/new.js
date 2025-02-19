@@ -10,7 +10,7 @@ const questions = [
     message: "Experiment ID:",
     validate: (val) => {
       if (val.toLowerCase().indexOf("cx") < 0) {
-        return "The experiment ID must conform to the convention CX<number> e.g. CX999";
+        return "The experiment ID must conform to the convention CX<number> e.g. CX999. The ID can be found in the CX ticket in Jira.";
       } else {
         return true;
       }
