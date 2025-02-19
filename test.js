@@ -1,1 +1,0 @@
-const optimizelyProjects = require('./optimizelyProjects');
