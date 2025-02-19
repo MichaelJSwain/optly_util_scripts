@@ -209,9 +209,8 @@ const createExperimentScaffolding = (
         config
       );
     }
+    console.log(`✅ experiment scaffolded for exp id: ${expID}, in project: ${brand.name}!`);
   });
-
-  console.log(`✅ experiment scaffolded for exp id: ${expID}, in project: ${brand.name}!`);
 };
 
 const prompt = inquirer.createPromptModule();
