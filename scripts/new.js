@@ -10,7 +10,7 @@ const questions = [
     message: "Experiment ID:",
     validate: (val) => {
       if (val.toLowerCase().indexOf("cx") < 0) {
-        return "The experiment ID must conform to the convention CX<number> e.g. CX999";
+        return "The experiment ID must conform to the convention CX<number> e.g. CX999. The ID can be found in the CX ticket in";
       } else {
         return true;
       }
@@ -211,7 +211,7 @@ const createExperimentScaffolding = (
     }
   });
 
-  console.log("✅ experiment scaffolded!");
+  console.log(`✅ experiment scaffolded for exp id: ${expID}, in project: ${brand.name}!`);
 };
 
 const prompt = inquirer.createPromptModule();
@@ -229,6 +229,6 @@ prompt(questions).then(async (answers) => {
     }
     createExperimentScaffolding(data);
   } else {
-      console.log(`⚠️ The directory with experiment ID '${expID}' already exists. Please use a unique experiment ID.`);
+      console.log(`⚠️ The directory with exp id: '${expID}' already exists. Please use a unique experiment ID.`);
   }
 });

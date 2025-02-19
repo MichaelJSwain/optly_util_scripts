@@ -28,6 +28,8 @@ export const networkManager = {
     // return res;
   },
   createExperiment: async (req_body) => {
+    console.log(`⚙️ Creating a new experiment in Optimizely...`)
+
     const endpoint = "https://api.optimizely.com/v2/experiments";
     const req_method = "POST";
 
@@ -36,6 +38,8 @@ export const networkManager = {
     return res;
   },
   updateExperiment: async (req_body, exp_id) => {
+    console.log(`⚙️ Publishing changes to existing experiment in Optimizely...`)
+
     const endpoint = `https://api.optimizely.com/v2/experiments/${exp_id}`;
     const req_method = "PATCH";
 
@@ -44,6 +48,8 @@ export const networkManager = {
     return res;
   },
   createPage: async (req_body) => {
+    console.log(`⚙️ Creating a new page in Optimizely...`)
+
     const endpoint = `https://api.optimizely.com/v2/pages`;
     const req_method = "POST";
 
@@ -52,6 +58,8 @@ export const networkManager = {
     return res;
   },
   updatePage: async (req_body, exp_id) => {
+    console.log(`⚙️ Publishing changes to existing page in Optimizely...`)
+
     const endpoint = `https://api.optimizely.com/v2/pages/${exp_id}`;
     const req_method = "PATCH";
 
@@ -76,7 +84,6 @@ export const networkManager = {
     return res;
   },
   getExperiment: async (exp_id) => {
-    console.log("checking experiment status");
     const endpoint = `https://api.optimizely.com/v2/experiments/${exp_id}`;
     const req_method = "GET";
 

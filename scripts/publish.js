@@ -6,6 +6,31 @@ const { getConfigFile } = require("./getConfigFile");
 const buildExp = require("./build");
 const isSafeToUpdateOptimizelyExperiment = require("./checkExpStatus");
 const optimizelyProjects = require("../optimizelyProjects");
+const inquirer = require("inquirer");
+
+const questions = [ 
+  {
+    type: "input",
+    name: "expID",
+    message: "Experiment ID:",
+    validate: (val) => {
+      return true;
+    },
+  },
+  {
+    type: "input",
+    name: "brand",
+    message: "Which brand(s)? (TH / CK / DB)",
+    validate: (val) => {
+      if (val.toLowerCase() != "th" && val.toLowerCase() != "ck" && val.toLowerCase() != "db") {
+        return "The experiment should target TH / CK / DB";
+      } else {
+        return true;
+      }
+    },
+  }
+];
+
 
 const getUserInput = () => {
   const userInput =
@@ -36,7 +61,7 @@ const createOptimizelyPage = async (expName, projectID, activation, urlCondition
       await networkManager.createPage(body);
 
     if (!optimizelyPage.success) {
-      console.log(`⚠️ Unable to create Optimizely page. ${optimizelyPage.code} - ${optimizelyPage.message}`);
+      console.log(`⚠️ Unable to publish Optimizely page. ${optimizelyPage.code} - ${optimizelyPage.message}`);
     }
     return optimizelyPage;
   }
@@ -154,6 +179,8 @@ const createOptimizelyExperiment = async (
 };
 
 const updateConfigFile = (expID, brand, configFile, key, resourceID) => {
+  console.log(`⚙️ Updating key: ${key} in the config file for exp id: ${expID}, in project: ${brand}...`)
+
   configFile[key] = resourceID;
   fs.writeFile(
     `./experiments/${expID}/${brand}/config.json`,
@@ -162,29 +189,33 @@ const updateConfigFile = (expID, brand, configFile, key, resourceID) => {
       encoding: "utf8",
     },
     (err) => {
-      if (err) console.log(`⚠️ Unable to update the ${key} in config file for expID:${expID} brand:${brand}`, err);
+      if (err) console.log(`⚠️ Unable to update key: ${key} in config file for exp id: ${expID}, in project: ${brand}`, err);
       else {
-        console.log(`✅ The ${key} in the config file for expID:${expID} brand:${brand} has been updated.`);
+        console.log(`✅ Updated key: ${key} in the config file for exp id: ${expID}, in project: ${brand}`);
       }
     }
   );
 };
 
 const publish = async () => {
-  const userInput = getUserInput();
-  console.log(userInput);
-  if (userInput) {
-    const { expID, brand } = userInput;
-    let brands = optimizelyProjects[brand.toLowerCase()];
+  const prompt = inquirer.createPromptModule();
+  prompt(questions).then(async (answers) => {
+    const {expID, brand} = answers;
+    
+    const brands = optimizelyProjects[brand.toLowerCase()];
 
     for (const brand of brands) {
       const configFile = getConfigFile(expID, brand.name);
 
       if (configFile) {
+        console.log(`✅ Config file for exp id: ${expID}, in project: ${brand.name} fetched and parsed`);
+        console.log(`⚙️ Checking if exp id: ${expID}, in project: ${brand.name} can be safely published to Optimizely...`);
 
         const isSafe = configFile.OptimizelyExperimentID ? await isSafeToUpdateOptimizelyExperiment(configFile.OptimizelyExperimentID, "publish") : true;
-        console.log(isSafe);
+        
         if (isSafe) {
+          console.log(`✅ Safe to publish exp id: ${expID}, in project: ${brand.name}`);
+
           const {
                   id,
                   name, 
@@ -205,6 +236,8 @@ const publish = async () => {
             const optlyPageID = optlyPage.id ? optlyPage.id : optlyPage;
 
             if (optlyPageID) {
+                  console.log(`✅ Published changes to page for exp id: ${expID}, in project: ${brand.name} in Optimizely`);
+
                   if (!configFile.OptimizelyPageID) {
                       updateConfigFile(expID, brand.name, configFile, 'OptimizelyPageID', optlyPageID);
                   }
@@ -220,7 +253,11 @@ const publish = async () => {
                     configFile.OptimizelyExperimentID
                   );
 
+                  console.log(`✅ Published changes to experiment for exp id: ${expID}, in project: ${brand.name} in Optimizely`);
+
                   if (optlyExperiment && optlyExperiment.id && !configFile.OptimizelyExperimentID) {
+                    
+
                     const variationIDs = optlyExperiment.variations.map(variation => variation.variation_id);
 
                     variationIDs.forEach((id, idx) => {
@@ -230,14 +267,12 @@ const publish = async () => {
                     updateConfigFile(expID, brand.name, configFile, 'OptimizelyExperimentID', optlyExperiment.id);
                   } 
             }
+        } else {
+          console.log(`⚠️ Action: "publish", for exp id: ${expID}, in project: ${brand.name} has been cancelled`);
         }
       }
     }
+  });
 
-  } else {
-    console.log(
-      "please specify the ID and brand for the Optimizely experiment you'd like to create e.g. CX100 TH"
-    );
-  }
 };
 publish();
