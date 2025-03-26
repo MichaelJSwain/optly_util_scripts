@@ -194,6 +194,20 @@ const createExperimentScaffolding = (
             "mobile": false
           }`
       );
+      fs.writeFileSync(
+        `./experiments/${expID}/readme.md`,
+        `Commands:
+          npm run new
+            Scaffolds a new experiment file and folder structure using initial parameters: experiment ID, project, experiment name and number of variants.
+          npm run publish
+            Publishes your experiment from the local directory to Optimizely
+            If you haven't created the experiment in the Optimizely dashboard, it will create a new experiment and page for the experiment
+            If the experiment has already been created in the Optimizely dashboard, it will update the existing experiment with changes in the local directory
+          npm run set
+            Start or pause an experiment
+            Starting an experiment will set the status to running.
+            Pausing an experiment will set the status to paused.`
+      );
 
       //   create config files
       const config = createConfigFile(
