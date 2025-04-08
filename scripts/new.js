@@ -67,11 +67,13 @@ const getBrandDetails = (brand) => {
 const createConfigFile = (expID, expName, numVariants, brand, projectID, editorUrl) => {
   const variantArray = Array.from(Array(numVariants).keys());
   const variants = variantArray.map((el, index) => {
+    const variantName = index === 0 ? "original" : `v${index}`;
+
     return `
         {
-            "name": "variant${index}",
-            "js": "./experiments/${expID}/${brand}/variations/variation${index}/index.js",
-            "css": "./experiments/${expID}/${brand}/variations/variation${index}/index.css",
+            "name": "${variantName}",
+            "js": "./experiments/${expID}/${brand}/variations/${variantName}/index.js",
+            "css": "./experiments/${expID}/${brand}/variations/${variantName}/index.css",
             "optimizely_variation_id": ""
         }
     `;
@@ -121,9 +123,11 @@ const createExperimentScaffolding = (
     });
 
     for (let i = 0; i < numVariants; i++) {
+      const variantName = i === 0 ? "original" : `v${i}`;
+
       // create variant dir
       fs.mkdirSync(
-        `./experiments/${expID}/${brand.name}/variations/variation${i}`,
+        `./experiments/${expID}/${brand.name}/variations/${variantName}`,
         {
           recursive: true,
         }
@@ -131,11 +135,11 @@ const createExperimentScaffolding = (
 
       // create variant files inside variant dir
       fs.writeFileSync(
-        `./experiments/${expID}/${brand.name}/variations/variation${i}/index.js`,
+        `./experiments/${expID}/${brand.name}/variations/${variantName}/index.js`,
         ""
       );
       fs.writeFileSync(
-        `./experiments/${expID}/${brand.name}/variations/variation${i}/index.css`,
+        `./experiments/${expID}/${brand.name}/variations/${variantName}/index.css`,
         ""
       );
 
