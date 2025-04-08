@@ -1,6 +1,7 @@
 import 'dotenv/config'
 // import { checkExpStatus } from './checkExpStatus';
 const { OPTLY_TOKEN } = process.env;
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 
 export const networkManager = {
   createRequestObject: (req_body, req_method) => {
