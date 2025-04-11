@@ -2,13 +2,12 @@ const inquirer = require("inquirer");
 const { networkManager } = require("./networkManager");
 const { TH_QA_AUDIENCE_ID, CK_QA_AUDIENCE_ID } = process.env;
 
-
 const prompts = {
   start: [
     {
       type: "input",
       name: "answer",
-      message: "This experiment does not use the QA audience and will be exposed to real users. Are you sure you want to proceed? (y|n)",
+      message: "You are about to launch this experiment to real users. Do you wish to proceed? (y | n)",
       validate: (val) => {
         if (val.toLowerCase() === "y" || val.toLowerCase() === "n") {
           return true;
@@ -22,7 +21,7 @@ const prompts = {
     {
       type: "input",
       name: "answer",
-      message: "Are you sure you want to pause a running experiment? (y|n)",
+      message: "You are about to pause this experiment. Do you wish to continue? (y | n)",
       validate: (val) => {
         if (val.toLowerCase() === "y" || val.toLowerCase() === "n") {
           return true;
@@ -36,7 +35,7 @@ const prompts = {
     {
       type: "input",
       name: "answer",
-      message: "Are you sure you want to update a running experiment? In general, this is not a recommended action (see knowledge base link for more details) (y | n)",
+      message: "Are you sure you want to update a running experiment? In general, this is not a recommended action. (y | n)",
       validate: (val) => {
         if (val.toLowerCase() === "y" || val.toLowerCase() === "n") {
           return true;
@@ -50,7 +49,7 @@ const prompts = {
     {
       type: "input",
       name: "answer",
-      message: "There were no custom goals found? Is this correct? (y|n)",
+      message: "No custom goals were found for this experiment. If this has been confirmed, select 'y'. Otherwise, please review the custom goals in the ticket or reach out to the analyst if you have any questions. (y | n)",
       validate: (val) => {
         if (val.toLowerCase() === "y" || val.toLowerCase() === "n") {
           return true;
@@ -128,12 +127,12 @@ const checkCustomGoals = (experiment) => {
 const validateExperimentLaunch = async (experiment) => {
   console.log("validating experiment launch");
   if (experiment.audience_conditions === "everyone") {
-    console.log("This experiment is currently targeting everyone. Please use the default Desktop and / or Mobile audiences in the Optimizely UI");
+    console.log("⚠️ Please set the audience to either desktop or mobile (or both) before launching the experiment.");
     return false;
   }
   const hasEqualTrafficAllocation = checkTrafficAllocation(10000, experiment.variations);
   if (!hasEqualTrafficAllocation) {
-    console.log("The experiment has an unequal traffic allocation between variants. Please set the traffic allocation to be equal in the Optimizely UI, before launching the experiment");
+    console.log("⚠️ The traffic allocation between variants is unequal. Before launching the experiment, please ensure the traffic is equally distributed between variants, such as 50/50.");
     return false;
   }
   const hasCustomGoals = checkCustomGoals(experiment);
