@@ -68,7 +68,7 @@ export const networkManager = {
     const res = await networkManager.call(endpoint, request_object);
     return res;
   },
-  createEvent: async (req_body, project_id) => {
+  createCustomGoal: async (req_body, project_id) => {
     const endpoint = `https://api.optimizely.com/v2/projects/${project_id}/custom_events`;
     const req_method = "POST";
 

@@ -6,8 +6,8 @@ require("dotenv").config();
 const { CK_PROJECT_ID, TH_PROJECT_ID } = process.env;
 
 const projectID = {
-  TH: parseInt(CK_PROJECT_ID),
-  CK: parseInt(TH_PROJECT_ID)
+  CK: parseInt(CK_PROJECT_ID),
+  TH: parseInt(TH_PROJECT_ID)
 }
 
 const questions = [
@@ -47,8 +47,10 @@ const questions = [
 
 const prompt = inquirer.createPromptModule();
 prompt(questions).then(async (answers) => {
-    const {expID, goalName, brand} = answers;
-
+    const brand = answers.brand.toUpperCase();
+    const expID = answers.expID.toUpperCase();
+    const goalName = answers.goalName;
+    
     const fullGoalName = `${expID} - ${goalName}`;
     
     const apiKeyForGoal = fullGoalName.toLowerCase().split(" ").join("_");
@@ -56,7 +58,7 @@ prompt(questions).then(async (answers) => {
     let brands = brand === "DB" ? ["TH", "CK"] : [brand];
 
     for (const brand of brands) {
-      const event = await networkManager.createEvent(body, projectID[brand]);
+      const event = await networkManager.createCustomGoal(body, projectID[brand]);
       
       if (event && event.id) {
           console.log("✅ Custom goal created");
