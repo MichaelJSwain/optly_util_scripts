@@ -125,7 +125,6 @@ const checkCustomGoals = (experiment) => {
 }
 
 const validateExperimentLaunch = async (experiment) => {
-  console.log("validating experiment launch");
   if (experiment.audience_conditions === "everyone") {
     console.log("⚠️ Please set the audience to either desktop or mobile (or both) before launching the experiment.");
     return false;
@@ -145,7 +144,6 @@ const validateExperimentLaunch = async (experiment) => {
 
 const isSafeToUpdateOptimizelyExperiment = async (optly_exp_id, action) => {
   const experiment = await networkManager.getExperiment(optly_exp_id);
-  console.log(experiment)
   if (experiment.success) {
     const {audience_conditions, status} = experiment;
     const isInQAmode = audience_conditions.includes(TH_QA_AUDIENCE_ID) || audience_conditions.includes(CK_QA_AUDIENCE_ID);
