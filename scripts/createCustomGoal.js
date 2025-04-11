@@ -1,16 +1,13 @@
-console.log("new custom goal file");
-
 const inquirer = require("inquirer");
 const fs = require("fs");
 const { networkManager } = require("./networkManager");
 const fsp = fs.promises;
 require("dotenv").config();
-const { OPTLY_TOKEN, CK_PROJECT_ID, TH_PROJECT_ID } = process.env;
-const args = process.argv;
+const { CK_PROJECT_ID, TH_PROJECT_ID } = process.env;
 
 const projectID = {
-  TH: parseInt(CK_PROJECT_ID),
-  CK: parseInt(TH_PROJECT_ID)
+  CK: parseInt(CK_PROJECT_ID),
+  TH: parseInt(TH_PROJECT_ID)
 }
 
 const questions = [
@@ -45,25 +42,15 @@ const questions = [
                 return true;
               }
         },
-      },
-    {
-        type: "input",
-        name: "addGoalToExp",
-        message: "Do you want to add this custom goal to the experiment? (y|n)",
-        validate: (val) => {
-            if (val.toLowerCase() === "y") {
-                return true;
-            } else if (val.toLowerCase() === "n") {
-                return false;
-            }
-        },
       }
 ];
 
 const prompt = inquirer.createPromptModule();
 prompt(questions).then(async (answers) => {
-    const {expID, goalName, brand, addGoalToExp} = answers;
-
+    const brand = answers.brand.toUpperCase();
+    const expID = answers.expID.toUpperCase();
+    const goalName = answers.goalName;
+    
     const fullGoalName = `${expID} - ${goalName}`;
     
     const apiKeyForGoal = fullGoalName.toLowerCase().split(" ").join("_");
@@ -71,16 +58,19 @@ prompt(questions).then(async (answers) => {
     let brands = brand === "DB" ? ["TH", "CK"] : [brand];
 
     for (const brand of brands) {
-      const event = await networkManager.createEvent(body, projectID[brand]);
+      const event = await networkManager.createCustomGoal(body, projectID[brand]);
       
-      if (event && event.id && addGoalToExp.toUpperCase() === "Y") {
-          console.log("adding event to experiment... ")
+      if (event && event.id) {
+          console.log("✅ Custom goal created");
           addToExpCustomGoals(expID, brand, event);
+      } else {
+        console.log("⚠️ Unable to create the custom goal. Please try again later")
       }
     }
 });
 
 const addToExpCustomGoals = async (expID, brand, event) => {
+    console.log("⚙️ updating customGoals.json file...")
     const customGoalsFile = await fsp.readFile(
         `./experiments/${expID}/${brand}/customGoals.json`,
         "binary"
@@ -97,7 +87,7 @@ const addToExpCustomGoals = async (expID, brand, event) => {
         (err) => {
           if (err) console.log(err);
           else {
-            console.log(`✅ Successfully updated config file for exp id: ${expID}, in project: ${brand}`);
+            console.log(`✅ Successfully updated customGoals.json file for exp id: ${expID}, in project: ${brand}`);
           }
         }
       );

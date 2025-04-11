@@ -8,7 +8,7 @@
     "new": "node scripts/new.js --command new",
     "publish": "node scripts/publish.js --command publish",
     "set": "node scripts/set.js --command set",
-    "addEvent": "node scripts/addEvent.js --command addEvent"
+    "createCustomGoal": "node scripts/createCustomGoal.js --command createCustomGoal"
   },
   "keywords": [],
   "author": "",
